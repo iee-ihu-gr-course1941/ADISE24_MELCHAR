@@ -1,0 +1,16 @@
+.mainBoard{
+    display: grid;
+    grid-template-columns:repeat(20, 1fr); ;
+    grid-template-rows: repeat(20, 1fr);;
+    background-color: white;
+    border-radius: 8px;
+    border-style: solid;
+    border-color: #ff6600;
+    height: 80vh;
+    width: 45vw;
+}
+
+.box {
+    border: 1px solid #ff6600;
+}
+

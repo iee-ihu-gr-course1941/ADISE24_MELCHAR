@@ -1,0 +1,10 @@
+.board{
+    background-color: white;
+    border-radius: 8px;
+    border-style: solid;
+    border-color: #ff6600;
+   
+    height: 40vh;
+    width: 25vw;
+}
+
