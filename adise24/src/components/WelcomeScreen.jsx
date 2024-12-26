@@ -19,7 +19,6 @@ function WelcomeScreen(){
                 <div className={style.buttonsContainer}>
                     <button className={style.wsBtn} onClick={goToLoginScreen}>LOGIN</button>
                     <button className={style.wsBtn} onClick={goToRegisterScreen}>REGISTER</button>
-                    <button className={style.wsBtn}>CONTINUE AS GUEST</button>
                 </div>
             </div>
 }
