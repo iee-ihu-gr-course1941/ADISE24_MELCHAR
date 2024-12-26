@@ -1,10 +1,10 @@
-import style from '../styling/RegisterScreen.module.css'
+import style from '../styling/LoginScreen.module.css'
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-function RegisterScreen(){
+function LoginScreen(){
 
-    const [formData, setFormData] = useState({ username: '', password: '', email: '' });
+    const [formData, setFormData] = useState({ username: '', password: ''});
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
@@ -22,10 +22,10 @@ function RegisterScreen(){
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
-    
+
         try {
             const response = await fetch(
-                'https://users.iee.ihu.gr/~iee2020188/adise_php/register.php',
+                'https://users.iee.ihu.gr/~iee2020188/adise_php/login.php',
                 {
                     method: 'POST',
                     body: JSON.stringify(formData),
@@ -33,8 +33,8 @@ function RegisterScreen(){
             );
     
             if (response.ok) {
-                if (response.status === 201) {
-                    navigate('/loginScreen');
+                if (response.status === 200) {
+                    navigate('/roomsScreen');
                 } else {
                     const result = await response.json();
                     setError(result.message || 'Unexpected response');
@@ -50,9 +50,9 @@ function RegisterScreen(){
     };
     
 
-    return <div className={style.registerScreen}>
+    return <div className={style.loginScreen}>
                 <div className={style.background}></div>
-                <h1 className={style.header}>INSERT YOUR CREDENTIALS</h1>
+                <h1 className={style.header}>LOGIN</h1>
                 <form className={style.form} onSubmit={handleSubmit}>
                 <div className={style.formElement}>
                     <label>Username:</label>
@@ -74,23 +74,13 @@ function RegisterScreen(){
                         required
                     />
                 </div>
-                <div className={style.formElement}>
-                    <label>Email:</label>
-                    <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
                 {error && <p style={{ color: 'red' }}>{error}</p>}
                 <div className={style.buttonContainer}>
                     <button type="button" onClick={goBack} className={style.regBtn}>GO BACK</button>
-                    <button type="submit" className={style.regBtn}>REGISTER</button>
+                    <button type="submit" className={style.regBtn}>LOGIN</button>
                 </div>
                 </form>
             </div>
 }
 
-export default RegisterScreen;
+export default LoginScreen;

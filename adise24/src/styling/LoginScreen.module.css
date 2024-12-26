@@ -1,4 +1,4 @@
-.registerScreen {
+.loginScreen {
     position: relative;
     width: 100vw;
     height: 100vh;
@@ -74,6 +74,6 @@
     box-shadow: 1px 1px 10px #666664;
     font-size: 1rem;
     font-weight: 700;
-    background-color: #001dfa;
+    background-color: #1ee300;
     cursor: pointer;
 }

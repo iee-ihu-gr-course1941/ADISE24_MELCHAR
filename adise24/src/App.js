@@ -2,7 +2,9 @@
 // import PlayerBoard from "./components/PlayerBoard";
 // import Mainboard from "./components/MainBoard";
 
+import LoginScreen from "./components/LoginScreen";
 import RegisterScreen from "./components/RegisterScreen";
+import RoomsScreen from "./components/RoomsScreen";
 import WelcomeScreen from "./components/WelcomeScreen";
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
@@ -12,6 +14,8 @@ function App() {
       <Routes>
         <Route path="/" element={<WelcomeScreen/>}/>
         <Route path="/registerScreen" element={<RegisterScreen/>}/>
+        <Route path="/loginScreen" element={<LoginScreen/>}/>
+        <Route path="/roomsScreen" element={<RoomsScreen/>}/>
       </Routes>
     </BrowserRouter>
     // <div className={style.container}>

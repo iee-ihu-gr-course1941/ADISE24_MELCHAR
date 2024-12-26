@@ -8,9 +8,13 @@
         header("Access-Control-Allow-Headers: Content-Type");
 
 
-        $username = filter_input(INPUT_POST, "username", FILTER_SANITIZE_SPECIAL_CHARS);
-        $password = filter_input(INPUT_POST, "password", FILTER_SANITIZE_SPECIAL_CHARS);
-        $email = filter_input(INPUT_POST, "email", FILTER_SANITIZE_SPECIAL_CHARS);
+        $jsonBody = file_get_contents('php://input');
+        
+        $data = json_decode($jsonBody, true);
+
+        $username = filter_var($data["username"] ?? "", FILTER_SANITIZE_SPECIAL_CHARS);
+        $password = filter_var($data["password"] ?? "", FILTER_SANITIZE_SPECIAL_CHARS);
+        $email    = filter_var($data["email"]    ?? "", FILTER_SANITIZE_SPECIAL_CHARS);
 
         if (empty($username)) {
             http_response_code(400); 
