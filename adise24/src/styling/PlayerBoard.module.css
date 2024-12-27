@@ -3,8 +3,13 @@
     border-radius: 8px;
     border-style: solid;
     border-color: #ff6600;
-   
     height: 40vh;
-    width: 25vw;
+    width: 24vw;
+    display: grid;
+    grid-template-columns: repeat(15, 1fr);
+    grid-template-rows: repeat(15, 1fr);
 }
 
+.box {
+    border: 1px solid #dddddd;
+}
