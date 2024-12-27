@@ -28,6 +28,9 @@ function RegisterScreen(){
                 'https://users.iee.ihu.gr/~iee2020188/adise_php/register.php',
                 {
                     method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify(formData),
                 }
             );
