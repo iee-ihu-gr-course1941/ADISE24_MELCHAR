@@ -28,15 +28,20 @@ function LoginScreen(){
                 'https://users.iee.ihu.gr/~iee2020188/adise_php/login.php',
                 {
                     method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify(formData),
+                    credentials: 'include'
                 }
             );
     
             if (response.ok) {
+                const result = await response.json();
+
                 if (response.status === 200) {
-                    navigate('/roomsScreen');
+                    navigate('/roomsScreen', { state: { player1_id: result.user_id } });
                 } else {
-                    const result = await response.json();
                     setError(result.message || 'Unexpected response');
                 }
             } else {

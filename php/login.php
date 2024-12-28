@@ -6,7 +6,7 @@
         header("Access-Control-Allow-Origin: http://localhost:3000");
         header("Access-Control-Allow-Headers: Content-Type, Authorization");
         header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-        
+        header('Access-Control-Allow-Credentials: true');
         http_response_code(200);
         exit();
     }elseif ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -16,7 +16,8 @@
         header("Access-Control-Allow-Origin: http://localhost:3000");
         header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
         header("Access-Control-Allow-Headers: Content-Type");
-
+        header('Access-Control-Allow-Credentials: true');
+        
         $jsonBody = file_get_contents('php://input');
 
         $data = json_decode($jsonBody, true);
@@ -45,6 +46,7 @@
                         $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
 
                         http_response_code(200);
+                        echo json_encode(["user_id" => $row['id']]);
                     }else{
                         http_response_code(401);
                         echo json_encode(["error" => "Wrong username or password."]);

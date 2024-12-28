@@ -1,5 +1,28 @@
 <?php
+
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'domain' => 'users.iee.ihu.gr',
+        'secure' => true,
+        'httponly' => true,
+        'samesite' => 'None'
+    ]);
     session_start();
+
+    header('Content-Type: application/json');
+    header("Access-Control-Allow-Origin: http://localhost:3000");
+    header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+    header("Access-Control-Allow-Headers: Content-Type");
+    header("Access-Control-Allow-Credentials: true");
+
+    if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+        header("Access-Control-Allow-Origin: http://localhost:3000");
+        header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+        header("Access-Control-Allow-Headers: Content-Type");
+        http_response_code(200);
+        exit();
+    }
 
     $sessionLifetime = 15 * 60;
     $inactivityLimit = 1800;
