@@ -11,3 +11,10 @@ CREATE TABLE rooms (
   player2_id INT UNIQUE,
   status VARCHAR(100) NOT NULL
 );
+
+CREATE TABLE boards(
+	board_id INT PRIMARY KEY,
+  board_p1 JSON, 
+  board_p2 JSON,
+  board_main JSON
+);
