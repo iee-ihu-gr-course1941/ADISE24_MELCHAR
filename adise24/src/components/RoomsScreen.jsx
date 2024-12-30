@@ -292,7 +292,7 @@ function RoomsScreen() {
     }
   };
 
-  const setBoards =  async (room_id) => {
+  const gameScreen = async (room_id) => {
     try {
       const response = await fetch(
         "https://users.iee.ihu.gr/~iee2020188/adise_php/setBoards.php",
@@ -310,11 +310,10 @@ function RoomsScreen() {
       if(response.ok) {
         const result = await response.json();
         if(result.success){
-          console.log("Board created successfully");
-          return result;
+          console.log("Board created successfully", room_id);
+          navigate(`/gameScreen?room_id=${room_id}`);
         } else {
-          console.error("Error:", result.message);
-          return result;
+          setError("Failed to set up the game board.");
         }
       } else {
         const result = await response.json();
@@ -322,15 +321,7 @@ function RoomsScreen() {
       }
     } catch (err) {
       console.error("Error connecting to the server:", err);
-    }
-  };
-
-  const gameScreen = async (room_id) => {
-    const result = await setBoards(room_id)
-    if (result && result.success) {
-      navigate('/gameScreen');
-    } else {
-      setError("Failed to set up the game board.");
+      setError("Failed to connect to the server.");
     }
   }
 
