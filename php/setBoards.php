@@ -1,47 +1,46 @@
 <?php
 include("dbconnection.php");
+include("session_manager.php");
 
-header("Access-Control-Allow-Origin: http://localhost:3000");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");  
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-header('Access-Control-Allow-Credentials: true');
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+    error_reporting(E_ALL);
 
-$input = json_decode(file_get_contents('php://input'), true);
+    $input = json_decode(file_get_contents('php://input'), true);
 
-if(isset($input['blocks']) && isset($input['board_id'])) {
-  $board_id = $input['board_id'];
-  $blocks = json_encode($input['blocks']);
+    if (!isset($input['blocks']) || !isset($input['board_id'])) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Blocks data not provided']);
+        exit;
+    }
+
+    $board_id = $input['board_id'];
+    $blocks   = json_encode($input['blocks']);
+
+    try{
+      $sql = "INSERT INTO boards (board_id, board_p1, board_p2)
+      VALUES ('{$board_id}', '{$blocks}', '{$blocks}')";
+
+      $result = mysqli_query($mysqli, $sql);
+
+      if ($result) {
+        http_response_code(200);
+      } else {
+        http_response_code(500);
+        echo json_encode(['error' => 'Failed to create room: ' . mysqli_error($mysqli)]);
+      }
+    }catch(mysmysqli_sql_exception $e){
+      http_response_code(409); 
+      echo json_encode(["error" => "You cannot join. The room is full."]);
+    }
+
+    mysqli_close($mysqli);
+
 } else {
-  $response = array('success' => false, 'message' => 'Blocks data not provided');
-  echo json_encode($response);
-  exit;
+    http_response_code(405);
+    echo json_encode([
+        'error' => 'Invalid request method'
+    ]);
 }
-
-$sql = "INSERT INTO boards (board_id, board_p1, board_p2) VALUES (?, ?, ?)";
-$stmt = $mysqli->prepare($sql);
-
-if ($stmt === false) {
-  $response = array('success' => false, 'message' => 'Failed to prepare SQL statement');
-  echo json_encode($response);
-  exit;
-}
-
-$stmt->bind_param("iss",$board_id, $blocks, $blocks);
-
-if($stmt->execute()) {
-  $response = array('success' => true, 'message' => 'Room created successfully');
-} else {
-  $response = array('success' => false, 'message' => 'Failed to create room');
-}
-
-if ($stmt->errno) {
-  $response = array('success' => false, 'message' => 'MySQL error: ' . $stmt->error);
-}
-
-$stmt->close();
-
-echo json_encode($response);
 ?>

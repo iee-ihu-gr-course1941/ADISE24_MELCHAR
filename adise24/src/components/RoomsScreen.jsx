@@ -223,14 +223,12 @@ function RoomsScreen() {
 
       if (response.ok) {
         const result = await response.json();
-        console.log(result.rooms);
         setRooms(result.rooms || []);
       } else {
         const result = await response.json();
         setError(result.error || "Failed to fetch rooms.");
       }
     } catch (err) {
-      console.log(err);
       setError("Failed to connect to the server.");
     }
   };
@@ -308,19 +306,41 @@ function RoomsScreen() {
       );
       
       if(response.ok) {
-        const result = await response.json();
-        if(result.success){
-          console.log("Board created successfully", room_id);
           navigate(`/gameScreen?room_id=${room_id}`);
-        } else {
-          setError("Failed to set up the game board.");
-        }
       } else {
-        const result = await response.json();
-        console.error("Failed to create board:", result.error || "Unknown error");
+          const result = await response.json();
+          setError(result.error || "Unknown error");
       }
     } catch (err) {
-      console.error("Error connecting to the server:", err);
+        console.log(err);
+        setError("Failed to connect to the server.");
+    }
+  }
+
+  const onJoinBtnClick = async (room_id) => {
+    try{
+      const response = await fetch(
+        "https://users.iee.ihu.gr/~iee2020188/adise_php/player2Join.php",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            room_id: parseInt(room_id),
+            player2_id: parseInt(player1_id)
+          }),
+          credentials: "include"
+        }
+      );
+
+      if(response.ok){
+        gameScreen(room_id);
+        console.log("success");
+      }else{
+        const result = await response.json();
+        setError(result.error || "Unknown error");
+      }
+    }catch(err){
+      console.log(err);
       setError("Failed to connect to the server.");
     }
   }
@@ -344,7 +364,7 @@ function RoomsScreen() {
               <h3 className={style.roomId}>#{room.room_id}</h3>
               <img className={style.cardImg} src="/user.png" alt="user icon" />
               <p className={style.cardDesc}>{room.player2_id !== null ? '2/2' : '1/2'}</p>
-              <button onClick={() => gameScreen(room.room_id)} className={style.cardBtn}>JOIN</button>
+              <button onClick={() => onJoinBtnClick(room.room_id)} className={style.cardBtn}>JOIN</button>
             </li>
           ))}
         </ul>

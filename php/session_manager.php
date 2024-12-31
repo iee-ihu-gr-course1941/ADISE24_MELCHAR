@@ -1,5 +1,10 @@
 <?php
-
+    header('Content-Type: application/json');
+    header("Access-Control-Allow-Origin: http://localhost:3000");
+    header("Access-Control-Allow-Methods: POST, GET, PUT, OPTIONS");
+    header("Access-Control-Allow-Headers: Content-Type");
+    header("Access-Control-Allow-Credentials: true");
+    
     session_set_cookie_params([
         'lifetime' => 0,
         'path' => '/',
@@ -10,16 +15,7 @@
     ]);
     session_start();
 
-    header('Content-Type: application/json');
-    header("Access-Control-Allow-Origin: http://localhost:3000");
-    header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
-    header("Access-Control-Allow-Headers: Content-Type");
-    header("Access-Control-Allow-Credentials: true");
-
     if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-        header("Access-Control-Allow-Origin: http://localhost:3000");
-        header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
-        header("Access-Control-Allow-Headers: Content-Type");
         http_response_code(200);
         exit();
     }
@@ -37,7 +33,7 @@
     if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
         http_response_code(401);
         echo json_encode(["error" => "Unauthorized access."]);
-        exit;
+        exit();
     }
 
     if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY']) > $inactivityLimit) {
@@ -45,7 +41,7 @@
         session_destroy();
         http_response_code(403);
         echo json_encode(["error" => "Session expired due to inactivity."]);
-        exit;
+        exit();
     }
 
     $_SESSION['LAST_ACTIVITY'] = time();
@@ -55,6 +51,6 @@
         session_destroy();
         http_response_code(403);
         echo json_encode(["error" => "Session hijacking detected."]);
-        exit;
+        exit();
     }
 ?>
