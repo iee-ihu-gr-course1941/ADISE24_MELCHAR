@@ -279,7 +279,7 @@ function RoomsScreen() {
       );
 
       if (response.ok) {
-        await fetchRooms();
+        navigate("/waitingScreen");
       } else {
         const result = await response.json();
         setError(result.error || "Something went wrong");
