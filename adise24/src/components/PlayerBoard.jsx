@@ -1,16 +1,20 @@
 import style from "../styling/PlayerBoard.module.css";
 import { useState, useEffect } from "react";
+import { lightBoxesForNextMove } from "../gameLogic/rules";
 
 const gridHight = 15;
 const gridWidth = 15;
 const totalBoxes = gridHight * gridWidth;
 
-function PlayerBoard({player, room_id}) {
-  
- 
+function PlayerBoard({player, room_id, rounds, onHighlight}) {
   const [blocks, setBlocks] = useState([]);
   const playerColor = player === 1 ? "blue" : "red";
+  useEffect(() => {
+    fetchBlocks();
+  }, []);
+
   const fetchBlocks = async () => {
+    
     try{
       const response = await fetch(
         `https://users.iee.ihu.gr/~iee2020188/adise_php/getBoards.php?board_id=${room_id}`,
@@ -33,11 +37,13 @@ function PlayerBoard({player, room_id}) {
     } catch(err) {
       console.error("Error", err);
     }
-  } 
+  }; 
 
-  useEffect(() => {
-    fetchBlocks();
-  }, []);
+  const handleClick = (block, rounds) => {
+    if (!block) return;
+    const highlightedBoxes  = lightBoxesForNextMove(block, rounds);
+    onHighlight(highlightedBoxes );
+  };
 
   return (
     <div className={style.board}>
@@ -57,6 +63,7 @@ function PlayerBoard({player, room_id}) {
               backgroundColor: block ? playerColor : "transparent",
               border: block ? "2px solid black" : "none",
             }}
+            onClick={() => block && handleClick(block, rounds)}
           ></div>
         );
       })}
