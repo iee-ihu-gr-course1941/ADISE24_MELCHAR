@@ -1,12 +1,15 @@
 import style from '../styling/LoginScreen.module.css'
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 function LoginScreen(){
 
     const [formData, setFormData] = useState({ username: '', password: ''});
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const from = location.state?.from?.pathname || '/roomsScreen';
 
     const handleChange = (e) => {
         setFormData({
@@ -40,7 +43,7 @@ function LoginScreen(){
                 const result = await response.json();
 
                 if (response.status === 200) {
-                    navigate('/roomsScreen', { state: { player1_id: result.user_id } });
+                    navigate(from, { state: { player1_id: result.user_id } });
                 } else {
                     setError(result.message || 'Unexpected response');
                 }

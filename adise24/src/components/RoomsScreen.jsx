@@ -29,6 +29,8 @@ function RoomsScreen() {
       if (response.ok) {
         const result = await response.json();
         setRooms(result.rooms || []);
+      } else if(response.status === 401){
+        navigate('/loginScreen', { state: { from: location } })
       } else {
         const result = await response.json();
         setError(result.error || "Failed to fetch rooms.");
@@ -86,6 +88,8 @@ function RoomsScreen() {
       if (response.ok) {
         const result = await response.json();
         navigate(`/waitingScreen?room_id=${result.room_id}`);
+      }else if(response.status === 401){
+        navigate('/loginScreen', { state: { from: location } })
       } else {
         const result = await response.json();
         setError(result.error || "Something went wrong");
@@ -113,7 +117,9 @@ function RoomsScreen() {
       
       if(response.ok) {
           navigate(`/gameScreen?room_id=${room_id}`);
-      } else {
+      } else if(response.status === 401){
+        navigate('/loginScreen', { state: { from: location } })
+      }else {
           const result = await response.json();
           setError(result.error || "Unknown error");
       }
@@ -140,7 +146,8 @@ function RoomsScreen() {
 
       if(response.ok){
         gameScreen(room_id);
-        console.log("success");
+      }else if(response.status === 401){
+        navigate('/loginScreen', { state: { from: location } })
       }else{
         const result = await response.json();
         setError(result.error || "Unknown error");
@@ -170,7 +177,7 @@ function RoomsScreen() {
               <h3 className={style.roomId}>#{room.room_id}</h3>
               <img className={style.cardImg} src="/user.png" alt="user icon" />
               <p className={style.cardDesc}>{room.player2_id !== null ? '2/2' : '1/2'}</p>
-              <button onClick={() => onJoinBtnClick(room.room_id)} className={style.cardBtn}>JOIN</button>
+              <button onClick={() => room.player2_id === null ? onJoinBtnClick(room.room_id) : setError("You cannot join. The room is full.")} className={style.cardBtn}>JOIN</button>
             </li>
           ))}
         </ul>

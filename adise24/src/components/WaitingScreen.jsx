@@ -29,7 +29,9 @@ function WaitingScreen(){
                 
                 if(response.ok) {
                     navigate(`/gameScreen?room_id=${room_id}`);
-                } else {
+                }else if(response.status === 401){
+                    navigate('/loginScreen', { state: { from: location } })
+                }else {
                     const result = await response.json();
                     alert(result.error || "Unknown error");
                 }
@@ -55,7 +57,9 @@ function WaitingScreen(){
                     if(result.room.player2_id !== null){
                         gameScreen(room_id);
                     }
-                } else {
+                }else if(response.status === 401){
+                    navigate('/loginScreen', { state: { from: location } })
+                }else {
                     const result = await response.json();
                     console.log(result.error);
                 }
@@ -65,7 +69,7 @@ function WaitingScreen(){
         }, 3000);
     
         return () => clearInterval(interval);
-    }, [room_id, blocks, navigate]);
+    }, [room_id, blocks, navigate, location]);
 
     const onCancelBtnClicked = async () => {
         
@@ -90,7 +94,9 @@ function WaitingScreen(){
 
               if(response.ok){
                 navigate('/roomsScreen');
-              }else{
+              }else if(response.status === 401){
+                navigate('/loginScreen', { state: { from: location } })
+            }else{
                 const result = await response.json();
                 alert(result.error || "An error occurred while deleting the room.");
               }
