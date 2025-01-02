@@ -18,3 +18,11 @@ CREATE TABLE boards(
   board_p2 JSON,
   board_main JSON
 );
+
+SELECT * 
+FROM boards 
+WHERE board_id = ?
+
+UPDATE boards 
+SET $player_field = ?, board_main = ? 
+WHERE board_id = ?

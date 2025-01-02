@@ -4,7 +4,6 @@ const gridSize = 20;
 const totalBoxes = gridSize * gridSize
 
 function MainBoard({ highlightedBoxes }) {
-    console.log("highlightedBoxes", highlightedBoxes);
     return (
         <div className={style.mainBoard}>
             {Array.from({ length: totalBoxes }).map((_, index) => {

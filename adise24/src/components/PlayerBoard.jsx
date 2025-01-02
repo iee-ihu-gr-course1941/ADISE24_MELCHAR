@@ -6,9 +6,11 @@ const gridHight = 15;
 const gridWidth = 15;
 const totalBoxes = gridHight * gridWidth;
 
-function PlayerBoard({player, room_id, rounds, onHighlight}) {
+function PlayerBoard({player, room_id, rounds, onHighlight, blockToMainBoard}) {
   const [blocks, setBlocks] = useState([]);
   const playerColor = player === 1 ? "blue" : "red";
+  
+  
   useEffect(() => {
     fetchBlocks();
   }, []);
@@ -29,7 +31,6 @@ function PlayerBoard({player, room_id, rounds, onHighlight}) {
         console.log("Blocks fetch successfully");
         console.log(result)
         setBlocks(result.board_p1 || []);
-        console.log("Blocks", blocks);
       } else {
         const result = await response.json();
         console.log("Fetch didn't complete", result.error)
@@ -40,9 +41,48 @@ function PlayerBoard({player, room_id, rounds, onHighlight}) {
   }; 
 
   const handleClick = (block, rounds) => {
+    console.log("Block", block);
     if (!block) return;
     const highlightedBoxes  = lightBoxesForNextMove(block, rounds);
-    onHighlight(highlightedBoxes );
+    onHighlight(highlightedBoxes);
+  };
+
+  const sendBlockInMainBoard = async (block, player) => {
+    console.log("Sending data to server:", {
+      board_id: room_id,
+      block: block,
+      player: player
+    });
+    try {
+      const response = await fetch(
+        "https://users.iee.ihu.gr/~iee2020188/adise_php/setBlockToMainBoard.php",
+        {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            block: block,
+            board_id: room_id,
+            player: player
+          }),
+          credentials: 'include'
+        }
+      );
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Block uploaded successfully");
+        console.log(result);
+      } else {
+        const result = await response.json();
+        console.log("Block doesn't uploaded");
+        console.error(result.error);
+      }
+    } catch (err) {
+      console.log("Error", err);
+    }
+   
   };
 
   return (
@@ -63,7 +103,8 @@ function PlayerBoard({player, room_id, rounds, onHighlight}) {
               backgroundColor: block ? playerColor : "transparent",
               border: block ? "2px solid black" : "none",
             }}
-            onClick={() => block && handleClick(block, rounds)}
+            // onClick={() => block && handleClick(block, rounds)}
+            onClick={() => block && sendBlockInMainBoard(block, player)}
           ></div>
         );
       })}

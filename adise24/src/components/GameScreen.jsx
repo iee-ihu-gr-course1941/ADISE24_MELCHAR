@@ -14,8 +14,8 @@ function GameScreen() {
   const handleHighLight = (newHighlightedBoxes) => {
     setHighlightedBoxes(newHighlightedBoxes);
   };
+  
 
-  console.log("highlightedBoxes", highlightedBoxes);
 
   return (
     <div className={style.container}>
@@ -32,7 +32,9 @@ function GameScreen() {
         <div className={style.marginBottom}>
           <>
             <h1>Blokus</h1>
-            <Mainboard highlightedBoxes={highlightedBoxes}/>
+            <Mainboard
+              highlightedBoxes={highlightedBoxes}
+            />
             <h3>Player {player_round}</h3>
           </>
         </div>
