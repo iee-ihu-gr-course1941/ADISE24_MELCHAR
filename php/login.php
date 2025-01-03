@@ -1,22 +1,8 @@
 <?php
+    include("session_manager.php");
     include("dbconnection.php");
 
-    if ($_SERVER["REQUEST_METHOD"] == "OPTIONS") {
-        
-        header("Access-Control-Allow-Origin: http://localhost:3000");
-        header("Access-Control-Allow-Headers: Content-Type, Authorization");
-        header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-        header('Access-Control-Allow-Credentials: true');
-        http_response_code(200);
-        exit();
-    }elseif ($_SERVER["REQUEST_METHOD"] == "POST") {
-        session_start();
-
-        header('Content-Type: application/json');
-        header("Access-Control-Allow-Origin: http://localhost:3000");
-        header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
-        header("Access-Control-Allow-Headers: Content-Type");
-        header('Access-Control-Allow-Credentials: true');
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
         
         $jsonBody = file_get_contents('php://input');
 
@@ -42,8 +28,6 @@
                         $_SESSION['user_id'] = $row['id'];
                         $_SESSION['username'] = $row['username'];
                         $_SESSION['logged_in'] = true;
-                        $_SESSION['user_ip'] = $_SERVER['REMOTE_ADDR'];
-                        $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
 
                         http_response_code(200);
                         echo json_encode(["user_id" => $row['id']]);

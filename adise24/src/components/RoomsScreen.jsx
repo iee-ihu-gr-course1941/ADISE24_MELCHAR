@@ -29,7 +29,7 @@ function RoomsScreen() {
       if (response.ok) {
         const result = await response.json();
         setRooms(result.rooms || []);
-      } else if(response.status === 401){
+      } else if(response.status === 401 || response.status === 403){
         navigate('/loginScreen', { state: { from: location } })
       } else {
         const result = await response.json();
@@ -56,6 +56,8 @@ function RoomsScreen() {
       if (response.ok) {
         if (response.status === 200) {
           navigate("/");
+        }else if(response.status === 401 || response.status === 403){
+          navigate('/loginScreen', { state: { from: location } })
         } else {
           const result = await response.json();
           setError(result.message || "Unexpected response");
@@ -88,7 +90,7 @@ function RoomsScreen() {
       if (response.ok) {
         const result = await response.json();
         navigate(`/waitingScreen?room_id=${result.room_id}`);
-      }else if(response.status === 401){
+      }else if(response.status === 401  || response.status === 403){
         navigate('/loginScreen', { state: { from: location } })
       } else {
         const result = await response.json();
@@ -117,7 +119,7 @@ function RoomsScreen() {
       
       if(response.ok) {
           navigate(`/gameScreen?room_id=${room_id}`);
-      } else if(response.status === 401){
+      } else if(response.status === 401 || response.status === 403){
         navigate('/loginScreen', { state: { from: location } })
       }else {
           const result = await response.json();
@@ -146,7 +148,7 @@ function RoomsScreen() {
 
       if(response.ok){
         gameScreen(room_id);
-      }else if(response.status === 401){
+      }else if(response.status === 401 || response.status === 403){
         navigate('/loginScreen', { state: { from: location } })
       }else{
         const result = await response.json();

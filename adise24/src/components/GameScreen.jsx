@@ -14,8 +14,12 @@ function GameScreen() {
   const handleHighLight = (newHighlightedBoxes) => {
     setHighlightedBoxes(newHighlightedBoxes);
   };
-  
+  const [blockToMain, setBlockToMain] = useState([]);
+  const handleBlockToMain = (newBlock, player) => {
+    setBlockToMain({ block: newBlock, player: player, board_id: room_id });
+  }
 
+ 
 
   return (
     <div className={style.container}>
@@ -25,6 +29,7 @@ function GameScreen() {
           room_id={room_id} 
           rounds={rounds}
           onHighlight={handleHighLight}
+          sendBlockToMain={handleBlockToMain}
         />
         <h2>Player 1</h2>
       </div>
@@ -34,6 +39,9 @@ function GameScreen() {
             <h1>Blokus</h1>
             <Mainboard
               highlightedBoxes={highlightedBoxes}
+              blockToMain={blockToMain.block}
+              player={blockToMain.player}
+              board_id={blockToMain.room_id}
             />
             <h3>Player {player_round}</h3>
           </>
@@ -45,6 +53,7 @@ function GameScreen() {
           room_id={room_id} 
           rounds={rounds}
           onHighlight={handleHighLight}
+          sendBlockToMain={handleBlockToMain}
         />
         <h2>Player 2</h2>
       </div>

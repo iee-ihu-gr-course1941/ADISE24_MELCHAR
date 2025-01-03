@@ -3,24 +3,7 @@ include("dbconnection.php");
 include("session_manager.php");
 
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    header("Access-Control-Allow-Origin: http://localhost:3000");
-    header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
-    header("Access-Control-Allow-Headers: Content-Type, Authorization");
-    header("Access-Control-Allow-Credentials: true");
-    header("Content-Type: application/json");
-    http_response_code(204); 
-    exit();
-} elseif ($_SERVER["REQUEST_METHOD"] == "POST"){
-    header("Access-Control-Allow-Origin: http://localhost:3000");
-    header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
-    header("Access-Control-Allow-Credentials: true");
-    header("Access-Control-Allow-Headers: Content-Type, Authorization");
-    header("Content-Type: application/json");
-    session_start();
-
-    echo "POST";
-    
+if ($_SERVER["REQUEST_METHOD"] == "POST"){    
     try {
         $input = json_decode(file_get_contents("php://input"), true);
 
