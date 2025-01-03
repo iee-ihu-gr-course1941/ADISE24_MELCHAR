@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import style from "../styling/RoomsScreen.module.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import initializePlayerBlocks from "./helperFunctions/InitializePlayerBlocks.js";
@@ -40,37 +40,61 @@ function RoomsScreen() {
     }
   };
 
-  const performLogOut = async (e) => {
-    e.preventDefault();
-    setError("");
+  const performLogOut = useCallback(
+    async (e) => {
+      if (e?.preventDefault) {
+        e.preventDefault();
+      }
+      setError("");
+      try {
+        const response = await fetch(
+          "https://users.iee.ihu.gr/~iee2020188/adise_php/logout.php",
+          {
+            method: "POST",
+            credentials: "include",
+          }
+        );
 
-    try {
-      const response = await fetch(
-        "https://users.iee.ihu.gr/~iee2020188/adise_php/logout.php",
-        {
-          method: "POST",
-          credentials: "include",
-        }
-      );
-
-      if (response.ok) {
-        if (response.status === 200) {
-          navigate("/");
-        }else if(response.status === 401 || response.status === 403){
-          navigate('/loginScreen', { state: { from: location } })
+        if (response.ok) {
+          if (response.status === 200) {
+            navigate("/");
+          } else if (response.status === 401 || response.status === 403) {
+            navigate("/loginScreen", { state: { from: location } });
+          } else {
+            const result = await response.json();
+            setError(result.message || "Unexpected response");
+          }
         } else {
           const result = await response.json();
-          setError(result.message || "Unexpected response");
+          setError(result.error || "Logout has failed, please try again.");
         }
-      } else {
-        const result = await response.json();
-        setError(result.error || "Logout has failed, please try again.");
+      } catch (err) {
+        console.log(err);
+        setError("Failed to connect to the server.");
       }
-    } catch (err) {
-      console.log(err);
-      setError("Failed to connect to the server.");
-    }
-  };
+    },
+    [navigate, location, setError]
+  );
+
+  useEffect(() => {
+    window.history.pushState(null, "", window.location.href);
+  
+    const handlePopState = (e) => {
+      e.preventDefault();
+      const confirmed = window.confirm("Are you sure you want to go back? You will log out!");
+      if (confirmed) {
+        performLogOut();
+      } else {
+        window.history.pushState(null, "", window.location.href);
+      }
+    };
+  
+    window.addEventListener("popstate", handlePopState);
+  
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [performLogOut]);
 
   const initializeRoom = async (e) => {
     e.preventDefault();

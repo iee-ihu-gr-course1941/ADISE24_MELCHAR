@@ -1,7 +1,7 @@
 import style from '../styling/WaitingScreen.module.css'
 import { useNavigate, useLocation } from "react-router-dom";
 import initializePlayerBlocks from "./helperFunctions/InitializePlayerBlocks.js";
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 
 function WaitingScreen(){
 
@@ -72,41 +72,64 @@ function WaitingScreen(){
         return () => clearInterval(interval);
     }, [room_id, blocks, navigate, location]);
 
-    const onCancelBtnClicked = async () => {
+    const onCancelBtnClicked = useCallback(
+        async () => {
         
-        const confirmed = window.confirm("Are you sure you want to cancel waiting? By canceling, the room will be deleted.");
+            const confirmed = window.confirm("Are you sure you want to cancel waiting? By canceling, the room will be deleted.");
+        
+            if (!confirmed) {
+                return;
+            }
     
-        if (!confirmed) {
-            return;
-        }
+            try{
+                const response = await fetch(
+                    "https://users.iee.ihu.gr/~iee2020188/adise_php/deleteRoom.php",
+                    {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        room_id: room_id
+                      }),
+                      credentials: "include",
+                    }
+                  );
+    
+                  if(response.ok){
+                    navigate('/roomsScreen', {state: {player1_id: player1_id}});
+                  }else if(response.status === 401 || response.status === 403){
+                    navigate('/loginScreen', { state: { from: location } })
+                }else{
+                    const result = await response.json();
+                    alert(result.error || "An error occurred while deleting the room.");
+                  }
+            }catch(err){
+                console.log(err);
+                alert("An error occurred while deleting the room.");
+            }
+    
+        },
+        [navigate, location, room_id, player1_id]
+    );
 
-        try{
-            const response = await fetch(
-                "https://users.iee.ihu.gr/~iee2020188/adise_php/deleteRoom.php",
-                {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    room_id: room_id
-                  }),
-                  credentials: "include",
-                }
-              );
-
-              if(response.ok){
-                navigate('/roomsScreen', {state: {player1_id: player1_id}});
-              }else if(response.status === 401 || response.status === 403){
-                navigate('/loginScreen', { state: { from: location } })
-            }else{
-                const result = await response.json();
-                alert(result.error || "An error occurred while deleting the room.");
-              }
-        }catch(err){
-            console.log(err);
-            alert("An error occurred while deleting the room.");
-        }
-
-    }
+    useEffect(() => {
+        window.history.pushState(null, "", window.location.href);
+      
+        const handlePopState = (e) => {
+          e.preventDefault();
+          const confirmed = window.confirm("Are you sure you want to go back?");
+          if (confirmed) {
+            onCancelBtnClicked();
+          } else {
+            window.history.pushState(null, "", window.location.href);
+          }
+        };
+      
+        window.addEventListener("popstate", handlePopState);
+      
+        return () => {
+          window.removeEventListener("popstate", handlePopState);
+        };
+      }, [onCancelBtnClicked]);
 
     return <div className={style.waitingScreen}>
         <div className={style.background}></div>
