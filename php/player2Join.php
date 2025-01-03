@@ -16,7 +16,7 @@
             exit;
         }else{
             try{
-                $query = "UPDATE rooms SET player2_id = '$player2_id' WHERE room_id = '$room_id'";
+                $query = "UPDATE rooms SET player2_id = '$player2_id', status = 'in_progress' WHERE room_id = '$room_id'";
                 mysqli_query($mysqli, $query);
 
                 http_response_code(200);
