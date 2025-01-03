@@ -10,6 +10,7 @@ function WaitingScreen(){
     const room_id = searchParams.get("room_id");
     const navigate = useNavigate();
     const blocks = initializePlayerBlocks();
+    const { player1_id } = location.state || {};
 
     useEffect(() => {
         const gameScreen = async (room_id) => {
@@ -93,7 +94,7 @@ function WaitingScreen(){
               );
 
               if(response.ok){
-                navigate('/roomsScreen');
+                navigate('/roomsScreen', {state: {player1_id: player1_id}});
               }else if(response.status === 401 || response.status === 403){
                 navigate('/loginScreen', { state: { from: location } })
             }else{

@@ -89,7 +89,7 @@ function RoomsScreen() {
 
       if (response.ok) {
         const result = await response.json();
-        navigate(`/waitingScreen?room_id=${result.room_id}`);
+        navigate(`/waitingScreen?room_id=${result.room_id}`, {state: { player1_id: player1_id }});
       }else if(response.status === 401  || response.status === 403){
         navigate('/loginScreen', { state: { from: location } })
       } else {
