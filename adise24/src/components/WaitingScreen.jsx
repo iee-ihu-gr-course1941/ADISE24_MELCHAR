@@ -29,7 +29,7 @@ function WaitingScreen(){
                 
                 if(response.ok) {
                     navigate(`/gameScreen?room_id=${room_id}`);
-                }else if(response.status === 401){
+                }else if(response.status === 401 || response.status === 403){
                     navigate('/loginScreen', { state: { from: location } })
                 }else {
                     const result = await response.json();
@@ -57,7 +57,7 @@ function WaitingScreen(){
                     if(result.room.player2_id !== null){
                         gameScreen(room_id);
                     }
-                }else if(response.status === 401){
+                }else if(response.status === 401 || response.status === 403){
                     navigate('/loginScreen', { state: { from: location } })
                 }else {
                     const result = await response.json();
@@ -94,7 +94,7 @@ function WaitingScreen(){
 
               if(response.ok){
                 navigate('/roomsScreen');
-              }else if(response.status === 401){
+              }else if(response.status === 401 || response.status === 403){
                 navigate('/loginScreen', { state: { from: location } })
             }else{
                 const result = await response.json();
