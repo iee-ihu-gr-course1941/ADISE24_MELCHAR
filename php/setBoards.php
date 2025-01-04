@@ -17,10 +17,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $board_id = $input['board_id'];
     $blocks   = json_encode($input['blocks']);
+    $board_main_json = json_encode([]);
 
     try{
-      $sql = "INSERT INTO boards (board_id, board_p1_1, board_p1_2, board_p2_1, board_p2_2)
-      VALUES ('{$board_id}', '{$blocks}', '{$blocks}', '{$blocks}', '{$blocks}')";
+      $sql = "INSERT INTO boards (board_id, board_p1_1, board_p1_2, board_p2_1, board_p2_2, board_main)
+      VALUES ('{$board_id}', '{$blocks}', '{$blocks}', '{$blocks}', '{$blocks}', ' $board_main_json')";
 
       $result = mysqli_query($mysqli, $sql);
 

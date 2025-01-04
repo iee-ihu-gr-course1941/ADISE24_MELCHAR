@@ -1,7 +1,6 @@
 import style from "../styling/PlayerBoard.module.css";
 import { useState, useEffect, useCallback } from "react";
 import { lightBoxesForNextMove } from "../gameLogic/rules";
-import initializePlayerBlocks from "./helperFunctions/InitializePlayerBlocks.js";
 
 const gridHight = 15;
 const gridWidth = 15;

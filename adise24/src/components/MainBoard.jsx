@@ -1,11 +1,64 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import style from '../styling/MainBoard.module.css'
+import { use } from "react";
 
 const gridSize = 20;
 const totalBoxes = gridSize * gridSize
 
 function MainBoard({ highlightedBoxes, blockToMain, player, playerBoardNum, board_id}) {
     const [coloredBlocks, setColoredBlocks] = useState([]);
+
+    const fetchColoredBlocks = useCallback( async () => {
+        try {
+            const response = await fetch(
+                `https://users.iee.ihu.gr/~iee2020188/adise_php/getMainBoard.php?board_id=${encodeURIComponent(board_id)}`,
+                {
+                    method: "GET",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                }
+            );
+
+            if (response.ok) {
+                const result = await response.json();
+
+                let blocksColor = "";
+                let allColoredBlocks = []
+
+                result.board.forEach((field) => {
+                    switch(field.player_field){
+                        case "board_p1_1": blocksColor = "blue"
+                        break;
+                        case "board_p1_2": blocksColor = "red"
+                        break;
+                        case "board_p2_1": blocksColor = "yellow"
+                        break;
+                        case "board_p2_2": blocksColor = "green"
+                        break;
+                    }
+
+
+                    field.main_board.forEach(cell => 
+                        allColoredBlocks.push({
+                            row: cell.row,
+                            col: cell.col,
+                            color: blocksColor
+                        }))
+                });
+
+                setColoredBlocks(allColoredBlocks);
+            } else {
+                const result = await response.json();
+                console.log(result.error);
+            }
+        } catch (err) {
+            console.log(err);
+        }
+    });
+
+    useEffect(() => {
+        fetchColoredBlocks();
+    }, []);
 
     const handleClick = (row, col) => {
         const minCell = blockToMain.cells.reduce((min, cell) => {
@@ -21,45 +74,15 @@ function MainBoard({ highlightedBoxes, blockToMain, player, playerBoardNum, boar
         const rowOffset = row - minCell.row;
         const colOffset = col - minCell.col;
 
-        let blocksColor = "";
-
-        switch(playerBoardNum){
-          case "board_p1_1": blocksColor = "blue"
-           break;
-          case "board_p1_2": blocksColor = "red"
-           break;
-          case "board_p2_1": blocksColor = "yellow"
-           break;
-          case "board_p2_2": blocksColor = "green"
-           break;
-        }
-
-        const newColoredBlock  = blockToMain.cells.map((cell) => ({
+        const blockDB = blockToMain.cells.map((cell) => ({
             row: cell.row + rowOffset,
-            col: cell.col + colOffset,
-            color: blocksColor,
+            col: cell.col + colOffset
         }));
 
-        const blockDB = newColoredBlock.map((cell) => ({
-            row: cell.row,
-            col: cell.col
-        }));
-
-        sendBlockToDB(blockDB)
-
-
-        setColoredBlocks((prevColoredBlocks) => [
-            ...prevColoredBlocks,
-            ...newColoredBlock.filter(
-                (newBox) =>
-                    !prevColoredBlocks.some(
-                        (box) => box.row === newBox.row && box.col === newBox.col
-                    )
-            ),
-        ]);
+        sendBlockToDB(blockDB, blockToMain)
     };
 
-    const sendBlockToDB = async (blockDB) => {
+    const sendBlockToDB = async (blockDB, initialBlocks) => {
     try {
         const response = await fetch(
         "https://users.iee.ihu.gr/~iee2020188/adise_php/setBlockToMainBoard.php",
@@ -70,7 +93,8 @@ function MainBoard({ highlightedBoxes, blockToMain, player, playerBoardNum, boar
             },
             body: JSON.stringify({
             block: blockDB,
-            board_id: board_id,
+            initialBlocks: initialBlocks,
+            board_id: parseInt(board_id),
             player: player
             }),
             credentials: 'include'
@@ -79,11 +103,12 @@ function MainBoard({ highlightedBoxes, blockToMain, player, playerBoardNum, boar
 
         if (response.ok) {
         const result = await response.json();
+        fetchColoredBlocks();
         console.log("Block uploaded successfully");
         console.log(result);
         } else {
         const result = await response.json();
-        console.log("Block doesn't uploaded");
+        console.log("Block didn't upload");
         console.error(result.error);
         }
     } catch (err) {

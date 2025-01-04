@@ -26,7 +26,7 @@ function GameScreen() {
         <PlayerBoard 
           playerBoardNum={"board_p1_1"} 
           room_id={room_id} 
-          player={1}
+          player={1.1}
           onHighlight={handleHighLight}
           sendBlockToMain={handleBlockToMain}
         />
@@ -34,7 +34,7 @@ function GameScreen() {
         <PlayerBoard 
           playerBoardNum={"board_p1_2"} 
           room_id={room_id} 
-          player={1}
+          player={1.2}
           onHighlight={handleHighLight}
           sendBlockToMain={handleBlockToMain}
         />
@@ -48,7 +48,7 @@ function GameScreen() {
               blockToMain={blockToMain.block}
               playerBoardNum={blockToMain.playerBoardNum}
               player={blockToMain.player}
-              board_id={blockToMain.room_id}
+              board_id={room_id}
             />
           </>
         </div>
@@ -58,7 +58,7 @@ function GameScreen() {
         <PlayerBoard 
           playerBoardNum={"board_p2_1"} 
           room_id={room_id} 
-          player={2}
+          player={2.1}
           onHighlight={handleHighLight}
           sendBlockToMain={handleBlockToMain}
         />
@@ -66,7 +66,7 @@ function GameScreen() {
         <PlayerBoard 
           playerBoardNum={"board_p2_2"} 
           room_id={room_id} 
-          player={2}
+          player={2.2}
           onHighlight={handleHighLight}
           sendBlockToMain={handleBlockToMain}
         />
