@@ -19,8 +19,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $blocks   = json_encode($input['blocks']);
 
     try{
-      $sql = "INSERT INTO boards (board_id, board_p1, board_p2)
-      VALUES ('{$board_id}', '{$blocks}', '{$blocks}')";
+      $sql = "INSERT INTO boards (board_id, board_p1_1, board_p1_2, board_p2_1, board_p2_2)
+      VALUES ('{$board_id}', '{$blocks}', '{$blocks}', '{$blocks}', '{$blocks}')";
 
       $result = mysqli_query($mysqli, $sql);
 

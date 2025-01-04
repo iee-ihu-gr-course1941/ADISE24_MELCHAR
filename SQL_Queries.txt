@@ -14,15 +14,9 @@ CREATE TABLE rooms (
 
 CREATE TABLE boards(
 	board_id INT PRIMARY KEY,
-  board_p1 JSON, 
-  board_p2 JSON,
+  board_p1_1 JSON, 
+  board_p1_2 JSON, 
+  board_p2_1 JSON,
+  board_p2_2 JSON, 
   board_main JSON
 );
-
-SELECT * 
-FROM boards 
-WHERE board_id = ?
-
-UPDATE boards 
-SET $player_field = ?, board_main = ? 
-WHERE board_id = ?

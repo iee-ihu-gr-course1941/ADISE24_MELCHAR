@@ -1,42 +1,61 @@
 import style from "../styling/PlayerBoard.module.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { lightBoxesForNextMove } from "../gameLogic/rules";
+import initializePlayerBlocks from "./helperFunctions/InitializePlayerBlocks.js";
 
 const gridHight = 15;
 const gridWidth = 15;
 const totalBoxes = gridHight * gridWidth;
 
-function PlayerBoard({player, room_id, rounds, onHighlight, sendBlockToMain}) {
+function PlayerBoard({playerBoardNum, room_id, player, onHighlight, sendBlockToMain}) {
   const [blocks, setBlocks] = useState([]);
-  const playerColor = player === 1 ? "blue" : "red";
-  
-  useEffect(() => {
-    fetchBlocks();
-  }, []);
+  let blocksColor = "";
 
-  const fetchBlocks = async () => {
-    try{
+  switch(playerBoardNum){
+    case "board_p1_1": blocksColor = "blue"
+     break;
+    case "board_p1_2": blocksColor = "red"
+     break;
+    case "board_p2_1": blocksColor = "yellow"
+     break;
+    case "board_p2_2": blocksColor = "green"
+     break;
+  }
+
+  const fetchPieces = useCallback(async () => {
+    try {
       const response = await fetch(
-        `https://users.iee.ihu.gr/~iee2020188/adise_php/getBoards.php?board_id=${room_id}`,
+        `https://users.iee.ihu.gr/~iee2020188/adise_php/getPlayerBoardByIdAndRoom.php?room_id=${encodeURIComponent(room_id)}&boardNum=${encodeURIComponent(playerBoardNum)}`,
         {
           method: "GET",
-          credentials: "include"
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
         }
       );
-
-      if(response.ok) {
-        const result = await response.json();
-        console.log("Blocks fetch successfully");
-        console.log(result)
-        setBlocks(result.board_p1 || []);
+  
+      if (response.ok) {
+        const pieces = await response.json();
+        const boardDataString = pieces.board[playerBoardNum];
+  
+        if (boardDataString) {
+          const boardData = JSON.parse(boardDataString);
+          setBlocks(boardData);
+        } else {
+          console.error(`No data found for board number: ${playerBoardNum}`);
+          setBlocks([]);
+        }
       } else {
-        const result = await response.json();
-        console.log("Fetch didn't complete", result.error)
+        console.error("Network response was not ok.");
       }
-    } catch(err) {
-      console.error("Error", err);
+    } catch (err) {
+      console.log(err);
     }
-  }; 
+  }, [room_id, playerBoardNum]);
+  
+
+  useEffect(() => {
+    fetchPieces();
+  }, []);
 
   const handleClick = (block, rounds) => {
     console.log("Block", block);
@@ -46,8 +65,8 @@ function PlayerBoard({player, room_id, rounds, onHighlight, sendBlockToMain}) {
   };
 
 
-  const sendBlock = (block, player, room_id) => {
-    sendBlockToMain(block, player, room_id);
+  const sendBlock = (block, player, playerBoardNum, room_id) => {
+    sendBlockToMain(block, player, playerBoardNum, room_id);
   }
 
   return (
@@ -65,11 +84,11 @@ function PlayerBoard({player, room_id, rounds, onHighlight, sendBlockToMain}) {
             key={index}
             className={style.box}
             style={{
-              backgroundColor: block ? playerColor : "transparent",
+              backgroundColor: block ? blocksColor : "transparent",
               border: block ? "2px solid black" : "none",
             }}
             // onClick={() => block && handleClick(block, rounds)}
-            onClick={() => block && sendBlock(block, player, room_id)}
+            onClick={() => block && sendBlock(block, player, playerBoardNum, room_id)}
             ></div>
         );
       })}

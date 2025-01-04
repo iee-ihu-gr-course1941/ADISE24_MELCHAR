@@ -11,22 +11,18 @@
     display: flex;
 }
 
-.section1{
+.section1, .section3{
     width: 25%;
     flex-direction: column;
-    padding:1vh;
+    align-items: center;
+    padding-bottom: 5vh;
+    justify-content: space-between;
 }
 
 .section2{
     width: 50%;
     justify-content: center;
     align-items: center;
-}
-
-.section3{
-    width: 25%;
-    flex-direction: column-reverse;
-    padding:1vh;
 }
 
 h1{

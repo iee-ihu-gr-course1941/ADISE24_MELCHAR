@@ -4,7 +4,7 @@ import style from '../styling/MainBoard.module.css'
 const gridSize = 20;
 const totalBoxes = gridSize * gridSize
 
-function MainBoard({ highlightedBoxes, blockToMain, player, board_id}) {
+function MainBoard({ highlightedBoxes, blockToMain, player, playerBoardNum, board_id}) {
     const [coloredBlocks, setColoredBlocks] = useState([]);
 
     const handleClick = (row, col) => {
@@ -21,10 +21,23 @@ function MainBoard({ highlightedBoxes, blockToMain, player, board_id}) {
         const rowOffset = row - minCell.row;
         const colOffset = col - minCell.col;
 
+        let blocksColor = "";
+
+        switch(playerBoardNum){
+          case "board_p1_1": blocksColor = "blue"
+           break;
+          case "board_p1_2": blocksColor = "red"
+           break;
+          case "board_p2_1": blocksColor = "yellow"
+           break;
+          case "board_p2_2": blocksColor = "green"
+           break;
+        }
+
         const newColoredBlock  = blockToMain.cells.map((cell) => ({
             row: cell.row + rowOffset,
             col: cell.col + colOffset,
-            color: player === 1 ? "blue" : "red",
+            color: blocksColor,
         }));
 
         const blockDB = newColoredBlock.map((cell) => ({
