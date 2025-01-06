@@ -1,4 +1,3 @@
-// PlayerBoard.jsx
 import style from "../styling/PlayerBoard.module.css";
 import { useState, useEffect, useCallback } from "react";
 import { lightBoxesForNextMove } from "../gameLogic/rules";

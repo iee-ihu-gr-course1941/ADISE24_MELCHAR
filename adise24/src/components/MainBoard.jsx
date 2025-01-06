@@ -1,11 +1,10 @@
-// MainBoard.jsx
 import React, { useEffect, useState, useCallback } from "react";
 import style from '../styling/MainBoard.module.css';
 
 const gridSize = 20;
 const totalBoxes = gridSize * gridSize;
 
-function MainBoard({ highlightedBoxes, blockToMain, player, board_id, onSuccess }) {
+function MainBoard({ highlightedBoxes, blockToMain, player, board_id, onSuccess, triggerFetch }) {
   const [coloredBlocks, setColoredBlocks] = useState([]);
 
   const fetchColoredBlocks = useCallback(async () => {
@@ -68,7 +67,7 @@ function MainBoard({ highlightedBoxes, blockToMain, player, board_id, onSuccess 
 
   useEffect(() => {
     fetchColoredBlocks();
-  }, [fetchColoredBlocks]);
+  }, [fetchColoredBlocks, triggerFetch]);
 
   const handleClick = (row, col) => {
     if (!blockToMain || !blockToMain.cells) return;

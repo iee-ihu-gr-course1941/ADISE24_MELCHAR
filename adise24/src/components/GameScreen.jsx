@@ -1,5 +1,4 @@
-// GameScreen.jsx
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import style from "../styling/App.module.css";
 import PlayerBoard from "./PlayerBoard";
@@ -11,12 +10,13 @@ function GameScreen() {
   const room_id = searchParams.get("room_id");
 
   const [highlightedBoxes, setHighlightedBoxes] = useState([]);
+  const [blockToMain, setBlockToMain] = useState(null);
+  const [fetchTrigger, setFetchTrigger] = useState(0);
+  const [error, setError] = useState(null);
 
   const handleHighLight = (newHighlightedBoxes) => {
     setHighlightedBoxes(newHighlightedBoxes);
   };
-
-  const [blockToMain, setBlockToMain] = useState(null);
 
   const handleBlockToMain = (newBlock, player, playerBoardNum) => {
     setBlockToMain({
@@ -27,11 +27,55 @@ function GameScreen() {
     });
   };
 
-  const [fetchTrigger, setFetchTrigger] = useState(0);
-
   const handleMainBoardSuccess = useCallback(() => {
     setFetchTrigger((prev) => prev + 1);
   }, []);
+
+  useEffect(() => {
+    if (!room_id) {
+      setError("Invalid room ID");
+      return;
+    }
+
+    const eventSource = new EventSource(
+      `https://users.iee.ihu.gr/~iee2020188/adise_php/sse.php?board_id=${room_id}`,
+      { withCredentials: true }
+    );
+
+    eventSource.addEventListener("connected", (event) => {
+      const data = JSON.parse(event.data);
+      console.log(data.message);
+    });
+
+    eventSource.addEventListener("update", (event) => {
+      const data = JSON.parse(event.data);
+      if (data.message === "Data changed") {
+        console.log("Update detected via SSE.");
+        setFetchTrigger((prev) => prev + 1);
+      }
+    });
+
+    eventSource.addEventListener("error", (event) => {
+      const data = JSON.parse(event.data);
+      console.error("SSE Error:", data.message);
+      setError(data.message);
+      eventSource.close();
+    });
+
+    eventSource.onerror = (err) => {
+      console.error("SSE Connection Error:", err);
+      setError("SSE Connection Error");
+      eventSource.close();
+    };
+
+    return () => {
+      eventSource.close();
+    };
+  }, [room_id]);
+
+  if (error) {
+    return <div className={style.error}>Error: {error}</div>;
+  }
 
   return (
     <div className={style.container}>
@@ -65,6 +109,7 @@ function GameScreen() {
               player={blockToMain ? blockToMain.player : null}
               board_id={room_id}
               onSuccess={handleMainBoardSuccess}
+              triggerFetch={fetchTrigger}
             />
           </>
         </div>
