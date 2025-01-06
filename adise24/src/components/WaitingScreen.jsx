@@ -22,14 +22,15 @@ function WaitingScreen(){
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
                             board_id: room_id,
-                            blocks
+                            blocks,
+                            player_id: parseInt(player1_id)
                         }),
                         credentials: "include",
                     }
                 );
                 
                 if(response.ok) {
-                    navigate(`/gameScreen?room_id=${room_id}`);
+                    navigate(`/gameScreen?room_id=${room_id}`, {state: {player_id: player1_id}});
                 }else if(response.status === 401 || response.status === 403){
                     navigate('/loginScreen', { state: { from: location } })
                 }else {

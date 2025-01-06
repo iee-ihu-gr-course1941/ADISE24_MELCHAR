@@ -1,5 +1,5 @@
+import React, { useState, useEffect, useCallback } from "react";
 import style from "../styling/PlayerBoard.module.css";
-import { useState, useEffect, useCallback } from "react";
 import { lightBoxesForNextMove } from "../gameLogic/rules";
 
 const gridHeight = 15;
@@ -78,7 +78,9 @@ function PlayerBoard({
   };
 
   const sendBlock = (block) => {
-    sendBlockToMain(block, player, playerBoardNum, room_id);
+    if (typeof sendBlockToMain === "function") {
+      sendBlockToMain(block, player, playerBoardNum);
+    }
   };
 
   return (

@@ -25,19 +25,24 @@
     }
 
     function getBoardState($mysqli, $board_id) {
-        $sql = "SELECT board_main, board_p1_1, board_p1_2, board_p2_1, board_p2_2, updated_at FROM boards WHERE board_id = ?";
+        $sql = "SELECT updated_at FROM boards WHERE board_id = ?";
         $stmt = $mysqli->prepare($sql);
         if (!$stmt) {
             return null;
         }
         $stmt->bind_param("i", $board_id);
         $stmt->execute();
-        $result = $stmt->get_result()->fetch_assoc();
+        $result_to_fetch_assoc = $stmt->get_result();
+        $result = $result_to_fetch_assoc->fetch_assoc();
         $stmt->close();
         return $result;
     }
 
-    $boardState = getBoardState($mysqli, $board_id);
+    $boardState = null;
+
+    while($boardState === null){
+        $boardState = getBoardState($mysqli, $board_id);
+    }
 
     if (!$boardState) {
         echo "event: error\n";

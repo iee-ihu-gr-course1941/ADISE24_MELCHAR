@@ -142,7 +142,7 @@ function RoomsScreen() {
       );
       
       if(response.ok) {
-          navigate(`/gameScreen?room_id=${room_id}`);
+          navigate(`/gameScreen?room_id=${room_id}`, {state: {player_id: player1_id}});
       } else if(response.status === 401 || response.status === 403){
         navigate('/loginScreen', { state: { from: location } })
       }else {

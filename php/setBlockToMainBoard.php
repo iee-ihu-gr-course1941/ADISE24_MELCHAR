@@ -11,8 +11,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
         $block = $input['block'];
         $initialBlocks = $input['initialBlocks'];
         $player = $input['player'];
+        $player_id = filter_var($input['player_id'], FILTER_VALIDATE_INT);
 
-        if (!$board_id || !$block || !$player || !$initialBlocks) {
+        if (!$board_id || !$block || !$player || !$initialBlocks || !$player_id) {
             http_response_code(400);
             echo json_encode(["error" => "Missing required parameteres", "initialBlocks" => $initialBlocks]);
             exit();
@@ -66,8 +67,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
 
         unset($player_blocks[$block_key]);
 
+        $stmt = $mysqli->prepare("SELECT * FROM rooms WHERE room_id = ?");
+        $stmt->bind_param("i", $board_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $room = $result->fetch_assoc();
 
-        $stmt = $mysqli->prepare("UPDATE boards SET `$player_field` = ?, board_main = ? WHERE board_id = ?");
+        $turn = 0;
+
+        if ((int)$room['player1_id'] === $player_id){
+            $turn = (int)$room['player2_id'];
+        } elseif ((int)$room['player2_id'] === $player_id){
+            $turn = (int)$room['player1_id'];
+        }
+
+        $stmt = $mysqli->prepare("UPDATE boards SET `$player_field` = ?, board_main = ?, player_turn = ?  WHERE board_id = ?");
         $player_blocks_json = json_encode(array_values($player_blocks));
 
         $combined_data = [
@@ -76,7 +90,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
         ];
         $main_board[] = $combined_data;
         $final_board_to_send = json_encode($main_board);
-        $stmt->bind_param("ssi", $player_blocks_json, $final_board_to_send, $board_id);
+        $stmt->bind_param("ssii", $player_blocks_json, $final_board_to_send, $turn, $board_id);
         $stmt->execute();
 
         http_response_code(200);

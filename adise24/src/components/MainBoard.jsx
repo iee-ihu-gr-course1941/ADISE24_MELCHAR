@@ -4,7 +4,7 @@ import style from '../styling/MainBoard.module.css';
 const gridSize = 20;
 const totalBoxes = gridSize * gridSize;
 
-function MainBoard({ highlightedBoxes, blockToMain, player, board_id, onSuccess, triggerFetch }) {
+function MainBoard({ highlightedBoxes, blockToMain, player, board_id, onSuccess, triggerFetch, player_id }) {
   const [coloredBlocks, setColoredBlocks] = useState([]);
 
   const fetchColoredBlocks = useCallback(async () => {
@@ -52,10 +52,6 @@ function MainBoard({ highlightedBoxes, blockToMain, player, board_id, onSuccess,
         });
 
         setColoredBlocks(allColoredBlocks);
-
-        if (onSuccess) {
-          onSuccess();
-        }
       } else {
         const result = await response.json();
         console.error("Error fetching main board:", result.error);
@@ -63,7 +59,7 @@ function MainBoard({ highlightedBoxes, blockToMain, player, board_id, onSuccess,
     } catch (err) {
       console.error("Fetch error in MainBoard:", err);
     }
-  }, [board_id, onSuccess]);
+  }, [board_id]);
 
   useEffect(() => {
     fetchColoredBlocks();
@@ -107,6 +103,7 @@ function MainBoard({ highlightedBoxes, blockToMain, player, board_id, onSuccess,
             initialBlocks: initialBlocks,
             board_id: parseInt(board_id),
             player: player,
+            player_id: player_id
           }),
           credentials: 'include',
         }
@@ -114,7 +111,12 @@ function MainBoard({ highlightedBoxes, blockToMain, player, board_id, onSuccess,
 
       if (response.ok) {
         const result = await response.json();
-        await fetchColoredBlocks(); // Refresh colored blocks
+        await fetchColoredBlocks();
+
+        if (onSuccess) {
+          onSuccess();
+        }
+        
         console.log("Block uploaded successfully:", result);
       } else {
         const result = await response.json();

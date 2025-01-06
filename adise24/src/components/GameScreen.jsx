@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import style from "../styling/App.module.css";
 import PlayerBoard from "./PlayerBoard";
 import MainBoard from "./MainBoard"; 
@@ -8,11 +8,16 @@ function GameScreen() {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const room_id = searchParams.get("room_id");
+  const navigate = useNavigate();
 
   const [highlightedBoxes, setHighlightedBoxes] = useState([]);
   const [blockToMain, setBlockToMain] = useState(null);
   const [fetchTrigger, setFetchTrigger] = useState(0);
   const [error, setError] = useState(null);
+  const { player_id } = location.state || {};
+  const [isPlayerPlayer1, setIsPlayerPlayer1] = useState(null);
+  const [isPlayersTurn, setIsPlayersTurn] = useState(false);
+  const [colorPlaying, setColorPlaying] = useState("");
 
   const handleHighLight = (newHighlightedBoxes) => {
     setHighlightedBoxes(newHighlightedBoxes);
@@ -32,25 +37,54 @@ function GameScreen() {
   }, []);
 
   useEffect(() => {
-    if (!room_id) {
-      setError("Invalid room ID");
+    const checkIsPlayerPlayer1 = async () => {
+      try {
+        const response = await fetch(
+          `https://users.iee.ihu.gr/~iee2020188/adise_php/getRoomById.php?room_id=${encodeURIComponent(room_id)}`,
+          {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+          }
+        );
+
+        if (response.ok) {
+          const result = await response.json();
+          result.room.player1_id === player_id
+            ? setIsPlayerPlayer1(true)
+            : setIsPlayerPlayer1(false);
+        } else if (response.status === 401 || response.status === 403) {
+          navigate('/loginScreen');
+        } else {
+          const result = await response.json();
+          console.log(result.error);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    checkIsPlayerPlayer1();
+  }, [room_id, player_id, navigate]);
+
+  useEffect(() => {
+    if (!room_id || isNaN(parseInt(room_id))) {
       return;
     }
 
     const eventSource = new EventSource(
-      `https://users.iee.ihu.gr/~iee2020188/adise_php/sse.php?board_id=${room_id}`,
+      `https://users.iee.ihu.gr/~iee2020188/adise_php/sse.php?board_id=${parseInt(room_id)}`,
       { withCredentials: true }
     );
 
     eventSource.addEventListener("connected", (event) => {
       const data = JSON.parse(event.data);
+      setFetchTrigger((prev) => prev + 1);
       console.log(data.message);
     });
 
     eventSource.addEventListener("update", (event) => {
       const data = JSON.parse(event.data);
       if (data.message === "Data changed") {
-        console.log("Update detected via SSE.");
         setFetchTrigger((prev) => prev + 1);
       }
     });
@@ -73,10 +107,61 @@ function GameScreen() {
     };
   }, [room_id]);
 
-  if (error) {
-    return <div className={style.error}>Error: {error}</div>;
-  }
+  useEffect(() => {
+    if (isPlayerPlayer1 !== null) {
+      if (isPlayerPlayer1) {
+        setColorPlaying("blue");
+      } else {
+        setColorPlaying("green");
+      }
+    }
+  }, [isPlayerPlayer1]);
 
+  useEffect(() => {
+    if (isPlayerPlayer1 === null) return;
+
+    if (isPlayerPlayer1) {
+      setColorPlaying((prevColor) =>
+        prevColor === "red" ? "blue" : "red"
+      );
+    } else {
+      setColorPlaying((prevColor) =>
+        prevColor === "green" ? "yellow" : "green"
+      );
+    }
+  }, [fetchTrigger, isPlayerPlayer1]);
+
+  useEffect(() => {
+    const fetchPlayerTurn = async () => {
+      try {
+        const response = await fetch(
+          `https://users.iee.ihu.gr/~iee2020188/adise_php/getBoardMatchDetails.php?board_id=${encodeURIComponent(room_id)}`,
+          {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+          }
+        );
+
+        if (response.ok) {
+          const result = await response.json();
+          setIsPlayersTurn(result.player_turn === player_id);
+        } else if (response.status === 401 || response.status === 403) {
+          navigate('/loginScreen');
+        } else {
+          const result = await response.json();
+          console.log(result.error);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    if (room_id && player_id) {
+      fetchPlayerTurn();
+    }
+  }, [fetchTrigger, room_id, player_id, navigate]);
+  
   return (
     <div className={style.container}>
       <div className={style.section1}>
@@ -86,7 +171,7 @@ function GameScreen() {
           room_id={room_id}
           player={1.1}
           onHighlight={handleHighLight}
-          sendBlockToMain={handleBlockToMain}
+          sendBlockToMain={isPlayerPlayer1 && isPlayersTurn && colorPlaying === "blue" ? handleBlockToMain : () => {}}
           triggerFetch={fetchTrigger}
         />
 
@@ -95,7 +180,7 @@ function GameScreen() {
           room_id={room_id}
           player={1.2}
           onHighlight={handleHighLight}
-          sendBlockToMain={handleBlockToMain}
+          sendBlockToMain={isPlayerPlayer1 && isPlayersTurn && colorPlaying === "red" ? handleBlockToMain : () => {}}
           triggerFetch={fetchTrigger} 
         />
       </div>
@@ -110,7 +195,9 @@ function GameScreen() {
               board_id={room_id}
               onSuccess={handleMainBoardSuccess}
               triggerFetch={fetchTrigger}
+              player_id={player_id}
             />
+            {error && <div className={style.error}>Error: {error}</div>}
           </>
         </div>
       </div>
@@ -121,7 +208,7 @@ function GameScreen() {
           room_id={room_id}
           player={2.1}
           onHighlight={handleHighLight}
-          sendBlockToMain={handleBlockToMain}
+          sendBlockToMain={!isPlayerPlayer1 && isPlayersTurn  && colorPlaying === "yellow" ? handleBlockToMain : () => {}}
           triggerFetch={fetchTrigger}
         />
 
@@ -130,7 +217,7 @@ function GameScreen() {
           room_id={room_id}
           player={2.2}
           onHighlight={handleHighLight}
-          sendBlockToMain={handleBlockToMain}
+          sendBlockToMain={!isPlayerPlayer1 && isPlayersTurn  && colorPlaying === "green" ? handleBlockToMain : () => {}}
           triggerFetch={fetchTrigger}
         />
       </div>
