@@ -118,8 +118,6 @@ function MainBoard({blockToMain, player, board_id, onSuccess, triggerFetch, play
             return blockCell.row > 20 || blockCell.col > 20 || blockCell.row < 1 || blockCell.col < 1
         });
 
-        console.log(blockDB);
-
         if(isAnotherBlockPlaced){
           if(onError){
             onError("Another block is placed in this position.");
@@ -145,7 +143,72 @@ function MainBoard({blockToMain, player, board_id, onSuccess, triggerFetch, play
               }
             }
           }else{
-            sendBlockToDB(blockDB, blockToMain);
+            let converted_player_field = "";
+
+            switch (player) {
+              case 1.1:
+                converted_player_field = "board_p1_1";
+                break;
+              case 1.2:
+                converted_player_field = "board_p1_2";
+                break;
+              case 2.1:
+                converted_player_field = "board_p2_1";
+                break;
+              case 2.2:
+                converted_player_field = "board_p2_2";
+                break;
+            }
+
+            console.log("converted_player_field: ", converted_player_field);
+
+            const sameColorFields = result.board.filter((field) => field.player_field === converted_player_field);
+
+            const sameColorCells = sameColorFields.reduce((acc, field) => {
+              return acc.concat(field.main_board);
+            }, []);
+
+            const isSideAdjacent = (cellA, cellB) => {
+              return (
+                (cellA.row === cellB.row && Math.abs(cellA.col - cellB.col) === 1) ||
+                (cellA.col === cellB.col && Math.abs(cellA.row - cellB.row) === 1)
+              );
+            };
+
+            const isCornerAdjacent = (cellA, cellB) => {
+              return (
+                Math.abs(cellA.row - cellB.row) === 1 &&
+                Math.abs(cellA.col - cellB.col) === 1
+              );
+            };
+
+            const touchesCornerOfSameColor = blockDB.some((newCell) => {
+              return sameColorCells.some((existingCell) => {
+                return isCornerAdjacent(newCell, existingCell);
+              });
+            });
+
+            const sharesSideWithSameColor = blockDB.some((newCell) => {
+              return sameColorCells.some((existingCell) => {
+                return isSideAdjacent(newCell, existingCell);
+              });
+            });
+
+            if (!touchesCornerOfSameColor) {
+              if (onError) {
+                onError(
+                  "At least one corner of your new piece must touch a corner of a piece of the same color."
+                );
+              }
+            } else if (sharesSideWithSameColor) {
+              if (onError) {
+                onError(
+                  "Your new piece cannot share an edge with any of your existing pieces."
+                );
+              }
+            } else {
+              sendBlockToDB(blockDB, blockToMain);
+            }
           }
         }
       }
