@@ -4,9 +4,8 @@ import style from '../styling/MainBoard.module.css';
 const gridSize = 20;
 const totalBoxes = gridSize * gridSize;
 
-function MainBoard({ highlightedBoxes, blockToMain, player, board_id, onSuccess, triggerFetch, player_id }) {
+function MainBoard({blockToMain, player, board_id, onSuccess, triggerFetch, player_id, isTheFirstMove, onError }) {
   const [coloredBlocks, setColoredBlocks] = useState([]);
-
   const fetchColoredBlocks = useCallback(async () => {
     try {
       const response = await fetch(
@@ -60,6 +59,7 @@ function MainBoard({ highlightedBoxes, blockToMain, player, board_id, onSuccess,
       console.error("Fetch error in MainBoard:", err);
     }
   }, [board_id]);
+  
 
   useEffect(() => {
     fetchColoredBlocks();
@@ -86,8 +86,75 @@ function MainBoard({ highlightedBoxes, blockToMain, player, board_id, onSuccess,
       col: cell.col + colOffset,
     }));
 
-    sendBlockToDB(blockDB, blockToMain);
+    checkIfIsValidMove(blockDB);
+
   };
+
+  const checkIfIsValidMove = async (blockDB) => {
+    if(onError){
+      onError(null);
+    }
+    try {
+      const response = await fetch(
+        `https://users.iee.ihu.gr/~iee2020188/adise_php/getMainBoard.php?board_id=${encodeURIComponent(board_id)}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        }
+      );
+
+      if(response.ok){
+        const result = await response.json();
+        const isAnotherBlockPlaced = result.board.some((element) => {
+          return element.main_board.some((boardCell) => {
+            return blockDB.some((blockCell) => {
+              return boardCell.row === blockCell.row && boardCell.col === blockCell.col;
+            });
+          });
+        });
+
+        const isBlockOffBounds = blockDB.some((blockCell) => {
+            return blockCell.row > 20 || blockCell.col > 20 || blockCell.row < 1 || blockCell.col < 1
+        });
+
+        console.log(blockDB);
+
+        if(isAnotherBlockPlaced){
+          if(onError){
+            onError("Another block is placed in this position.");
+          }
+        }else if(isBlockOffBounds){
+          if(onError){
+            onError("Block exceeds the main board boarder.");
+          }
+        }else{
+          if(isTheFirstMove){
+            const isBlockPlacedInCorner = blockDB.some((blockCell) => {
+                console.log(blockCell);
+                return (blockCell.row === 1 && blockCell.col === 1)
+                || (blockCell.row === 1 && blockCell.col === 20)
+                || (blockCell.row === 20 && blockCell.col === 1)
+                || (blockCell.row === 20 && blockCell.col === 20)
+            })
+            if(isBlockPlacedInCorner){
+              sendBlockToDB(blockDB, blockToMain);
+            }else{
+              if(onError){
+                onError("The first block must be placed to one of the available corners.");
+              }
+            }
+          }else{
+            sendBlockToDB(blockDB, blockToMain);
+          }
+        }
+      }
+    }catch(err){
+      if(onError){
+        onError("Something went wrong. Try again.");
+      }
+    }
+  }
 
   const sendBlockToDB = async (blockDB, initialBlocks) => {
     try {
@@ -133,10 +200,6 @@ function MainBoard({ highlightedBoxes, blockToMain, player, board_id, onSuccess,
         const row = Math.floor(index / gridSize) + 1;
         const col = (index % gridSize) + 1;
 
-        const isHighlighted = highlightedBoxes.some(
-          (box) => box.row === row && box.col === col
-        );
-
         const coloredBox = coloredBlocks.find(
           (box) => box.row === row && box.col === col
         );
@@ -146,7 +209,7 @@ function MainBoard({ highlightedBoxes, blockToMain, player, board_id, onSuccess,
             key={index}
             className={style.box}
             style={{
-              backgroundColor: coloredBox ? coloredBox.color : (isHighlighted ? "lightgrey" : "transparent"),
+              backgroundColor: coloredBox ? coloredBox.color : "transparent",
               border: "1px solid black",
             }}
             onClick={() => handleClick(row, col)}

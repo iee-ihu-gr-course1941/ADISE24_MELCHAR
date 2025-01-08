@@ -10,7 +10,6 @@ function GameScreen() {
   const room_id = searchParams.get("room_id");
   const navigate = useNavigate();
 
-  const [highlightedBoxes, setHighlightedBoxes] = useState([]);
   const [blockToMain, setBlockToMain] = useState(null);
   const [fetchTrigger, setFetchTrigger] = useState(0);
   const [error, setError] = useState(null);
@@ -19,21 +18,22 @@ function GameScreen() {
   const [isPlayersTurn, setIsPlayersTurn] = useState(false);
   const [colorPlaying, setColorPlaying] = useState("");
 
-  const handleHighLight = (newHighlightedBoxes) => {
-    setHighlightedBoxes(newHighlightedBoxes);
-  };
-
-  const handleBlockToMain = (newBlock, player, playerBoardNum) => {
+  const handleBlockToMain = (newBlock, player, playerBoardNum, isTheFirstMove) => {
     setBlockToMain({
       block: newBlock,
       player: player,
       playerBoardNum: playerBoardNum,
+      isTheFirstMove: isTheFirstMove,
       board_id: room_id,
     });
   };
 
   const handleMainBoardSuccess = useCallback(() => {
     setFetchTrigger((prev) => prev + 1);
+  }, []);
+
+  const handleMainBoardError = useCallback((errorMessage) => {
+    setError(errorMessage);
   }, []);
 
   useEffect(() => {
@@ -170,7 +170,6 @@ function GameScreen() {
           playerBoardNum={"board_p1_1"}
           room_id={room_id}
           player={1.1}
-          onHighlight={handleHighLight}
           sendBlockToMain={isPlayerPlayer1 && isPlayersTurn && colorPlaying === "blue" ? handleBlockToMain : () => {}}
           triggerFetch={fetchTrigger}
         />
@@ -179,7 +178,6 @@ function GameScreen() {
           playerBoardNum={"board_p1_2"}
           room_id={room_id}
           player={1.2}
-          onHighlight={handleHighLight}
           sendBlockToMain={isPlayerPlayer1 && isPlayersTurn && colorPlaying === "red" ? handleBlockToMain : () => {}}
           triggerFetch={fetchTrigger} 
         />
@@ -189,10 +187,11 @@ function GameScreen() {
           <>
             <h1>Blokus</h1>
             <MainBoard
-              highlightedBoxes={highlightedBoxes}
               blockToMain={blockToMain ? blockToMain.block : null}
               player={blockToMain ? blockToMain.player : null}
               board_id={room_id}
+              isTheFirstMove={blockToMain ? blockToMain.isTheFirstMove : true}
+              onError={handleMainBoardError}
               onSuccess={handleMainBoardSuccess}
               triggerFetch={fetchTrigger}
               player_id={player_id}
@@ -214,7 +213,6 @@ function GameScreen() {
           playerBoardNum={"board_p2_1"}
           room_id={room_id}
           player={2.1}
-          onHighlight={handleHighLight}
           sendBlockToMain={!isPlayerPlayer1 && isPlayersTurn  && colorPlaying === "yellow" ? handleBlockToMain : () => {}}
           triggerFetch={fetchTrigger}
         />
@@ -223,7 +221,6 @@ function GameScreen() {
           playerBoardNum={"board_p2_2"}
           room_id={room_id}
           player={2.2}
-          onHighlight={handleHighLight}
           sendBlockToMain={!isPlayerPlayer1 && isPlayersTurn  && colorPlaying === "green" ? handleBlockToMain : () => {}}
           triggerFetch={fetchTrigger}
         />

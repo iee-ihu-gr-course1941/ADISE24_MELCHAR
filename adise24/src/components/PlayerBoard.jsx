@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
 import style from "../styling/PlayerBoard.module.css";
-import { lightBoxesForNextMove } from "../gameLogic/rules";
 
 const gridHeight = 15;
 const gridWidth = 15;
@@ -10,12 +9,12 @@ function PlayerBoard({
   playerBoardNum,
   room_id,
   player,
-  onHighlight,
   sendBlockToMain,
   triggerFetch,
 }) {
   const [blocks, setBlocks] = useState([]);
   let blocksColor = "";
+  const [isTheFirstMove, setIsTheFirstMove] = useState(true);
 
   switch (playerBoardNum) {
     case "board_p1_1":
@@ -54,6 +53,7 @@ function PlayerBoard({
         if (boardDataString) {
           const boardData = JSON.parse(boardDataString);
           setBlocks(boardData);
+          setIsTheFirstMove(parseInt(boardData.length) === 21);
         } else {
           console.error(`No data found for board number: ${playerBoardNum}`);
           setBlocks([]);
@@ -70,16 +70,9 @@ function PlayerBoard({
     fetchPieces();
   }, [fetchPieces, triggerFetch]); 
 
-  const handleClick = (block, rounds) => {
-    console.log("Block", block);
-    if (!block) return;
-    const highlightedBoxes = lightBoxesForNextMove(block, rounds);
-    onHighlight(highlightedBoxes);
-  };
-
   const sendBlock = (block) => {
     if (typeof sendBlockToMain === "function") {
-      sendBlockToMain(block, player, playerBoardNum);
+      sendBlockToMain(block, player, playerBoardNum, isTheFirstMove);
     }
   };
 
