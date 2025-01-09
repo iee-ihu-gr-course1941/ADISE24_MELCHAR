@@ -1,138 +1,70 @@
 # ADISE24_MELCHAR
 
 ## Project explaination
-This project is an implementation of the Blokus online game. It is a 2-player online game. One player creates a room and waits for another player to join. Once the second player joins the room, the game starts. Each player has their own board with the available blocks. By clicking on a block, the available moves on the main board are displayed. When the player selects their next move on the main board, the block disappears from their board and appears on the main board. Then, it is the second player’s turn.
+This project is an implementation of the Blokus online game. It is a 2-player online game. One player creates a room and waits for another player to join. Once the second player joins the room, the game starts. Each player has their own boards with the available blocks. Player one owns the blue and the red boards and player two owns the yellow and the green boards. By clicking on a block, the available moves on the main board are displayed. When the player selects their next move on the main board, the block disappears from their board and appears on the main board. Then, it is the second player’s turn. The game finishes if a player empties one of their two boards or if both of them haven't any available moves.
 
 ## End points
 
-1. https://users.iee.ihu.gr/~iee2020188/adise_php/createRoom.php
+1. /createRoom.php
 
+The script handles the creation of a game room for a player. It starts by including a database connection and session management files. It checks if the incoming HTTP request is a POST request and then processes the JSON body to retrieve the player1_id. After sanitizing the input, it queries the database to check if the player already has an active room. If no active room exists, it creates a new room with the player's ID, setting the status to "waiting". If successful, it returns the new room's ID. If the player already has an active room, it returns an error with a conflict status code. Errors during database operations or invalid HTTP methods are handled with appropriate responses.
 
-This PHP script handles the creation of a new game room.
+2. /deleteRoom.php
 
-* HTTP 200: room creation.
-* HTTP 404: error at room creating.
-* HTTP 405: method not allowed.
+The script is designed to delete a game room based on its room_id. It begins by including a database connection and session management files. The script checks if the incoming HTTP request is a POST request. It then decodes the JSON body to extract and validate the room_id. Using this ID, it attempts to delete the corresponding room from the database. If successful, it responds with a status code of 200. If a database error occurs, a server error response is returned. Requests using methods other than POST are rejected with a 405 status code and an error message.
 
-2. https://users.iee.ihu.gr/~iee2020188/adise_php/deleteRoom.php
+3. /getAvailableRooms.php
 
+The script retrieves all game rooms from the database. It starts by including a database connection and session management files. It checks if the incoming HTTP request is a GET request. If so, it executes a query to fetch all records from the rooms table. The results are stored in an array, which is then returned as a JSON response with a 200 status code. If a database error occurs, a 404 error response is returned. Requests using methods other than GET are rejected with a 405 status code and an error message.
 
-This PHP script handles POST requests to delete a room from the database based on the provided room_id.
+4. /getBoardMatchDetailsRoom.php
 
-* HTTP 200: delete room.
-* HTTP 500: internal server error.
-* HTTP 405: method not allowed.
+The script retrieves game board details, including the current player's turn and the points of both players. It begins by including database connection and session management files. It checks if the request method is GET and validates the board_id parameter from the query string. If valid, it executes a database query to fetch the player_turn, player1_points, and player2_points for the specified board. The results are returned as a JSON response with a 200 status code. If a database error occurs, it returns a 500 error with the exception message. Requests using methods other than GET are rejected with a 405 status code and an error message.
 
+5. /getMainBoard.php
 
-3. https://users.iee.ihu.gr/~iee2020188/adise_php/getAvailableRooms.php
+The script retrieves the main structure of a game board from the database. It includes database connection and session management files and checks if the request method is GET. It validates the board_id parameter from the query string and uses it to query the boards table for the board_main field. The retrieved JSON-encoded board data is decoded into a PHP array and returned as a JSON response with a 200 status code. If a database error occurs, it returns a 500 error with the exception message. Requests using methods other than GET are rejected with a 405 status code and an error message.
 
-This PHP script handles GET requests to retrieve a list of rooms from the database and return the data as a JSON response.
+6. /getPlayerBoardByIdAndRoom.php
 
-* HTTP 200: returns available rooms.
-* HTTP 500: internal server error.
-* HTTP 405: method not allowed.
+The script retrieves a specific board field from the boards table in the database. It includes database connection and session management files and validates that the request method is GET. It extracts and validates the room_id and boardNum parameters from the query string. Using these parameters, it dynamically constructs a query to fetch the specified column (boardNum) for the given board ID (room_id). The result is returned as a JSON response with a 200 status code. If a database error occurs, it responds with a 500 error and the exception message. Requests using methods other than GET are rejected with a 405 status code and an error message.
 
-4. https://users.iee.ihu.gr/~iee2020188/adise_php/getBoardMatchDetailsRoom.php
+7. /getRoomById.php
 
-This PHP script is designed to handle GET requests and retrieve game-related information from the database based on the board_id. 
+The script retrieves details of a specific room from the database. It starts by including database connection and session management files. The request method is validated to ensure it is a GET request. The room_id parameter is extracted from the query string and validated as an integer. Using this ID, the script queries the rooms table to fetch all details of the specified room. The resulting data is returned as a JSON response with a 200 status code. If an error occurs during database operations, a 500 error with a generic error message is returned. Requests using methods other than GET are rejected with a 405 status code and an error message.
 
-* HTTP 200: returns player's turn, players points.
-* HTTP 500: internal server error.
-* HTTP 405: method not allowed.
+8. /login.php
 
-5. https://users.iee.ihu.gr/~iee2020188/adise_php/getMainBoard.php
+The script handles user authentication by verifying a username and password against the database. It begins by including session management and database connection files. It ensures that the request method is POST, then decodes the JSON body to extract the username and password, sanitizing the inputs. The script queries the users table for the provided username. If the username does not exist, it returns a 404 status code with an error message. If the user is found, the password is verified against the stored password hash using password_verify. If the password is correct, the user’s session is initialized with their ID, username, and a logged_in status. A 200 status code and the user ID are returned. If the password is incorrect, a 401 status code is sent with an error message. Database errors and non-POST requests are handled with appropriate status codes and error messages.
 
-This PHP script handles a GET request to retrieve the main board data from the database.
+9. /logout.php 
 
-* HTTP 200: returns main board.
-* HTTP 500: internal server error.
-* HTTP 405: method not allowed.
+The script handles user logout by terminating the current session. It begins by including the session management file and checks if the request method is POST. If so, it clears all session variables using session_unset() and destroys the session with session_destroy(). A JSON response with a 200 status code confirms the successful logout. If the request method is not POST, a 405 status code and an error message are returned.
 
-6. https://users.iee.ihu.gr/~iee2020188/adise_php/getPlayerBoardByIdAndRoom.php
+10. /player2Join.php
 
-This PHP script handles a GET request to fetch a specific board's data from the database.
+The script handles the process of adding a second player to a game room and updating the room's status. It begins by including session management and database connection files. The script checks if the request method is POST and then processes the incoming JSON body to extract the room_id and player2_id values, validating them as integers. If any parameter is missing or invalid, it returns a 400 status code with an error message. Otherwise, it proceeds to update the rooms table by setting the player2_id and changing the room's status to "in_progress". If the update is successful, a 200 status code is returned. In case of a database error, a 500 error is returned with an appropriate error message. Non-POST requests are rejected with a 405 status code and an error message.
 
-* HTTP 200: returns players board.
-* HTTP 500: internal server error.
-* HTTP 405: method not allowed.
+11. /register.php
 
-7. https://users.iee.ihu.gr/~iee2020188/adise_php/getRoomById.php
+The script handles user registration by creating a new account in the database. It begins by handling the OPTIONS request for CORS (Cross-Origin Resource Sharing), setting appropriate headers for allowing requests from a specific origin. If the request method is POST, it processes the incoming JSON data, extracting and sanitizing the username, password, and email fields. If any of the required fields are missing, it returns a 400 status code with an error message. If all fields are provided, the password is hashed using password_hash and then an INSERT query is executed to add the new user to the users table. If the query is successful, a 201 status code is returned with a success message. If an account already exists with the provided credentials, a 409 status code and an error message are returned. Non-POST requests are rejected with a 405 status code and an error message.
 
-This PHP script handles the retrieval of room details based on a GET request.
+12. /session_manager.php
 
-* HTTP 200: returns room's information.
-* HTTP 500: internal server error.
-* HTTP 405: method not allowed.
+This script is responsible for managing user sessions, including session creation, session expiration, and security. It begins by setting appropriate HTTP headers for handling CORS (Cross-Origin Resource Sharing) and enabling cookies for secure session handling. The script ensures that session cookies are configured with secure parameters such as secure, httponly, and samesite to protect against cross-site scripting (XSS) and cross-site request forgery (CSRF) attacks. When a session starts, it checks if the session has been inactive beyond a defined inactivity limit (1800 seconds or 30 minutes). If so, the session is destroyed, and the user is informed with a 403 status code and an error message indicating session expiration. If the session has exceeded the defined lifetime (15 minutes), the session ID is regenerated for security purposes to prevent session fixation attacks. The script also ensures that only authenticated users can access certain pages (e.g., excluding the login page). If the user is not logged in, they will be denied access with a 401 status code and an "Unauthorized access" message. Finally, it updates the LAST_ACTIVITY timestamp to track the most recent activity, helping monitor session activity and enforcing the inactivity limit.
 
-8. https://users.iee.ihu.gr/~iee2020188/adise_php/login.php
+13. /setBlockToMainBoard.php
 
-This PHP script handles logging in a user from a session.
+This PHP script handles updating a game board in a database. When a POST request is made, it expects a JSON payload containing parameters like board_id, block, block_id, player, and player_id. The script begins by validating the provided parameters and checks if all necessary data is present. If any required information is missing or invalid, it returns a 400 error. Next, the script queries the database for the specified board using the board_id. If the board is not found, it responds with a 404 error. After retrieving the board, the script determines the appropriate player field based on the player parameter and decodes the board’s JSON data. The script checks if the specified block (block_id) exists in the player’s blocks. If the block is not found, a 400 error is returned with information about the player's blocks for debugging. If the block is found, it is removed from the player’s blocks.The script then determines whose turn it is by checking the room data in the rooms table. It updates the board’s data in the database, including the player’s updated blocks and the new state of the main board after removing the block. The script returns a success message with the updated board in the response.If any errors occur during the process, such as a database issue or an exception, the script catches them and returns a 500 error. Finally, the script closes the database connection and any prepared statements before completing the process..
 
-* HTTP 200: user logged in.
-* HTTP 401: wrong username or password.
-* HTTP 404: user not found.
+14. /setBoards.php
 
-9. https://users.iee.ihu.gr/~iee2020188/adise_php/logout.php 
+This PHP script is designed to handle the creation of a new game board in a database when a POST request is made. It starts by enabling error reporting for debugging purposes. The script first checks if the required blocks data and board_id are present in the incoming JSON payload. If any of these are missing, it returns a 400 status code with an error message indicating that blocks data was not provided. After verifying the required data, the script proceeds to extract the board_id, blocks, and player_id from the request. The blocks are then encoded into a JSON string, and an empty JSON array is initialized for the board_main. The script then constructs an SQL query to insert a new record into the boards table. This query includes the board ID, the blocks for both players (board_p1_1, board_p1_2, board_p2_1, board_p2_2), the empty board_main, and the player_turn field set to the player ID. The SQL query is executed, and if it succeeds, a 200 status code is returned, indicating that the room was created successfully. If the query fails for any reason, it returns a 500 status code with the error message from the database. In case of an exception (such as a problem with the SQL execution), a 409 error is returned, suggesting that the room is full and cannot accommodate another player. Finally, the script closes the database connection. If the request method is not POST, a 405 error is returned, indicating that the request method is not allowed.
 
-This PHP script handles logging out a user from a session. 
+15. /sse.php
 
-* HTTP 405: method not allowed.
-* HTTP 400: bad request.
+This PHP script creates a Server-Sent Events (SSE) connection to provide real-time updates from a game, following these steps: First, it includes the dbconnection.php and session_manager.php files for handling database connections and sessions. The session is then closed using session_write_close() to allow session data to be used without blocking other operations. The script sets the response headers to support SSE communication by setting the Content-Type to text/event-stream, indicating that the response will be a continuous stream of events. It also prevents response caching with Cache-Control: no-cache and keeps the connection alive with the Connection: keep-alive header. The function set_time_limit(0) ensures that the script will not terminate due to a time limit. The process starts by disabling output buffering to allow immediate sending of data to the client when is ready. Next, it checks if the board_id is present in the URL parameters and if it's a valid number. If it's invalid or missing, an error message is sent via SSE and the execution stops. The getBoardState function runs an SQL query to retrieve the updated_at field from the boards table, which is used to check if the game has been updated since the last check. Initially, the script waits to receive the correct board state, and if it's unavailable, it continues trying to fetch the state. If the board_id is not found or there's an issue, an error message is sent, and the script terminates. Once the board_id is valid and the board state is available, the script sends an SSE event with the "connected" label to notify the client that the connection was successful. Then, the script enters an infinite loop, checking every 2 seconds whether there has been any change in the updated_at field of the board. If the value of updated_at has changed, an SSE event with the "update" label is sent to inform the client about the change. If the client's connection is closed, the script terminates. This logic allows real-time broadcasting of changes to the client without requiring page refreshes or other actions from the user.
 
-10. https://users.iee.ihu.gr/~iee2020188/adise_php/player2Join.php
+16. /dbconnection.php
 
-This PHP script handles requests for a player to join an existing game room.
-
-* HTTP 200: player2 joins room.
-* HTTP 400: bad request.
-* HTTP 500: internal server error.
-* HTTP 405: method not allowed.
-
-11. https://users.iee.ihu.gr/~iee2020188/adise_php/register.php
-
-This PHP script handles user registration requests.
-
-* HTTP 201: account created.
-* HTTP 400: bad request.
-* HTTP 409: conflict.
-* HTTP 405: method not allowed.
-
-12. https://users.iee.ihu.gr/~iee2020188/adise_php/session_manager.php
-
-This PHP script is responsible for managing session security and handling access control in a web application.
-
-* HTTP 200: ok.
-* HTTP 401: Unauthorized.
-* HTTP 405: method not allowed.
-
-13. https://users.iee.ihu.gr/~iee2020188/adise_php/setBlockToMainBoard.php
-
-This PHP script handles a POST request to update a game board in the database. It receives the board ID, block data, initial blocks, player information, and player ID as input.
-
-* HTTP 200: ok, block added to main board.
-* HTTP 400: bad request.
-* HTTP 404: board not found.
-* HTTP 500: internal server error.
-
-14. https://users.iee.ihu.gr/~iee2020188/adise_php/setBoards.php
-
-This PHP script is used to create a new game board in the database when a POST request is made. The script processes the provided input and inserts the data into the boards table. It also handles possible errors and ensures that the correct request method is used.
-
-* HTTP 200: ok, boards setted successfully.
-* HTTP 400: bad request.
-* HTTP 405: method not allowed.
-* HTTP 409: conflict.
-
-15. https://users.iee.ihu.gr/~iee2020188/adise_php/sse.php
-
-This script implements Server-Sent Events (SSE), allowing the server to send real-time updates to the client by monitoring changes in a game board. Based on the board's state and the server's actions, the script returns different messages.
-
-* event: error
-This event is returned when there is an error, such as an invalid board_id or if the board is not found.
-
-* event: connected
-This event is returned when the connection is successfully established, and the client is connected via SSE.
-
-* event: update 
-This event is returned whenever the board is updated (based on the updated_at value from the database). It is sent when there is a change in the board.
-
+This PHP script establishes a connection to a MySQL database using the mysqli extension. The script first sets the connection parameters, which include the username, password, hostname, and database name. The script uses mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT) to ensure that any errors or warnings are reported, helping in debugging. The connection is then established with the new mysqli() constructor, which takes the hostname, username, password, database name, default port, and socket path as arguments. If the connection fails, an error message is shown, providing the error number and description for troubleshooting. The script is designed to handle database connections efficiently, especially for local setups.
