@@ -196,13 +196,22 @@ function GameScreen() {
               triggerFetch={fetchTrigger}
               player_id={player_id}
             />
-            {error && <div className={style.error}>Error: {error}</div>}
-            <div className={style.turn}>
-              {isPlayersTurn && isPlayerPlayer1 ? `Player 1 turn! Color playing: ${colorPlaying}` : 
-                !isPlayersTurn && isPlayerPlayer1 ? "Player 2 turn!" :
-                isPlayersTurn && !isPlayerPlayer1 ? `Player 2 turn! Color playing: ${colorPlaying}` :
-                !isPlayersTurn && !isPlayerPlayer1 ? "Player 1 turn!" : ""
-              }
+            <div className={style.gameScreenActions}>
+              <div className={style.btnWrapper}>
+                <button className={style.gameScreenRotateBtn}>ROTATE 90o</button>
+                <button className={style.gameScreenFlipBtn}>FLIP</button>
+              </div>
+              <div className={style.messagesWrapper}>
+                {error && <div className={style.error}>Error: {error}</div>}
+                <div className={style.turn}>
+                  {isPlayersTurn && isPlayerPlayer1 ? `Player 1 turn! Color playing: ${colorPlaying}` : 
+                    !isPlayersTurn && isPlayerPlayer1 ? "Player 2 turn!" :
+                    isPlayersTurn && !isPlayerPlayer1 ? `Player 2 turn! Color playing: ${colorPlaying}` :
+                    !isPlayersTurn && !isPlayerPlayer1 ? "Player 1 turn!" : ""
+                  }
+                </div>
+              </div>
+              <button className={style.leaveBtn}>LEAVE</button>
             </div>
           </>
         </div>
