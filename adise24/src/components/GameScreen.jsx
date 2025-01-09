@@ -4,6 +4,7 @@ import style from "../styling/App.module.css";
 import PlayerBoard from "./PlayerBoard";
 import MainBoard from "./MainBoard"; 
 import { rotateBlockCellsBy90 } from "./helperFunctions/RotateBlockCellsBy90";
+import { flipBlockCellsHorizontally } from "./helperFunctions/FlipBlockCellsHorizontally";
 
 function GameScreen() {
   const location = useLocation();
@@ -46,6 +47,20 @@ function GameScreen() {
       block: {
         ...prev.block,
         cells: rotatedCells,
+      },
+    }));
+  };
+
+  const handleFlipBlock = () => {
+    if (!blockToMain?.block?.cells) return;
+
+    const flippedCells = flipBlockCellsHorizontally(blockToMain.block.cells);
+
+    setBlockToMain((prev) => ({
+      ...prev,
+      block: {
+        ...prev.block,
+        cells: flippedCells,
       },
     }));
   };
@@ -213,7 +228,7 @@ function GameScreen() {
             <div className={style.gameScreenActions}>
               <div className={style.btnWrapper}>
                 <button className={style.gameScreenRotateBtn} onClick={handleRotateBlock}>ROTATE 90o</button>
-                <button className={style.gameScreenFlipBtn}>FLIP</button>
+                <button className={style.gameScreenFlipBtn} onClick={handleFlipBlock}>FLIP</button>
               </div>
               <div className={style.messagesWrapper}>
                 {error && <div className={style.error}>Error: {error}</div>}
