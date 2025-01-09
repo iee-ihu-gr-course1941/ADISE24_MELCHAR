@@ -129,14 +129,13 @@ function MainBoard({blockToMain, player, board_id, onSuccess, triggerFetch, play
         }else{
           if(isTheFirstMove){
             const isBlockPlacedInCorner = blockDB.some((blockCell) => {
-                console.log(blockCell);
                 return (blockCell.row === 1 && blockCell.col === 1)
                 || (blockCell.row === 1 && blockCell.col === 20)
                 || (blockCell.row === 20 && blockCell.col === 1)
                 || (blockCell.row === 20 && blockCell.col === 20)
             })
             if(isBlockPlacedInCorner){
-              sendBlockToDB(blockDB, blockToMain);
+              sendBlockToDB(blockDB);
             }else{
               if(onError){
                 onError("The first block must be placed to one of the available corners.");
@@ -159,8 +158,6 @@ function MainBoard({blockToMain, player, board_id, onSuccess, triggerFetch, play
                 converted_player_field = "board_p2_2";
                 break;
             }
-
-            console.log("converted_player_field: ", converted_player_field);
 
             const sameColorFields = result.board.filter((field) => field.player_field === converted_player_field);
 
@@ -207,7 +204,7 @@ function MainBoard({blockToMain, player, board_id, onSuccess, triggerFetch, play
                 );
               }
             } else {
-              sendBlockToDB(blockDB, blockToMain);
+              sendBlockToDB(blockDB);
             }
           }
         }
@@ -219,7 +216,7 @@ function MainBoard({blockToMain, player, board_id, onSuccess, triggerFetch, play
     }
   }
 
-  const sendBlockToDB = async (blockDB, initialBlocks) => {
+  const sendBlockToDB = async (blockDB) => {
     try {
       const response = await fetch(
         "https://users.iee.ihu.gr/~iee2020188/adise_php/setBlockToMainBoard.php",
@@ -230,7 +227,7 @@ function MainBoard({blockToMain, player, board_id, onSuccess, triggerFetch, play
           },
           body: JSON.stringify({
             block: blockDB,
-            initialBlocks: initialBlocks,
+            block_id: parseInt(blockToMain.id),
             board_id: parseInt(board_id),
             player: player,
             player_id: player_id
@@ -246,11 +243,9 @@ function MainBoard({blockToMain, player, board_id, onSuccess, triggerFetch, play
         if (onSuccess) {
           onSuccess();
         }
-        
-        console.log("Block uploaded successfully:", result);
       } else {
         const result = await response.json();
-        console.error("Block upload failed:", result.error);
+        console.error("Block upload failed:");
       }
     } catch (err) {
       console.error("Error sending block to DB:", err);

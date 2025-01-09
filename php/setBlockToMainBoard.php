@@ -9,13 +9,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
 
         $board_id = $input['board_id'];
         $block = $input['block'];
-        $initialBlocks = $input['initialBlocks'];
+        $block_id = filter_var($input['block_id'], FILTER_VALIDATE_INT);
         $player = $input['player'];
         $player_id = filter_var($input['player_id'], FILTER_VALIDATE_INT);
 
-        if (!$board_id || !$block || !$player || !$initialBlocks || !$player_id) {
+        if (!$board_id || !$block || !$player || !$block_id || !$player_id) {
             http_response_code(400);
-            echo json_encode(["error" => "Missing required parameteres", "initialBlocks" => $initialBlocks]);
+            echo json_encode(["error" => "Missing required parameteres"]);
             exit();
         }
 
@@ -58,10 +58,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
             exit();
         }
 
-        $block_key = array_search($initialBlocks, $player_blocks);
+        $block_keys = array_column($player_blocks, 'id');  
+        $block_key = array_search($block_id, $block_keys);
         if ($block_key === false) {
             http_response_code(400);
-            echo json_encode(["error" => "Block not found in player's blocks.", "player_blocks" => $player_blocks, "block" => $block]);
+            echo json_encode(["error" => "Block not found in player's blocks.", "player_blocks" => $player_blocks, "block_id" => $block_id]);
             exit();
         }
 

@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import style from "../styling/App.module.css";
 import PlayerBoard from "./PlayerBoard";
 import MainBoard from "./MainBoard"; 
+import { rotateBlockCellsBy90 } from "./helperFunctions/RotateBlockCellsBy90";
 
 function GameScreen() {
   const location = useLocation();
@@ -35,6 +36,19 @@ function GameScreen() {
   const handleMainBoardError = useCallback((errorMessage) => {
     setError(errorMessage);
   }, []);
+
+  const handleRotateBlock = () => {
+    if (!blockToMain?.block?.cells) return;
+
+    const rotatedCells = rotateBlockCellsBy90(blockToMain.block.cells);
+    setBlockToMain((prev) => ({
+      ...prev,
+      block: {
+        ...prev.block,
+        cells: rotatedCells,
+      },
+    }));
+  };
 
   useEffect(() => {
     const checkIsPlayerPlayer1 = async () => {
@@ -198,7 +212,7 @@ function GameScreen() {
             />
             <div className={style.gameScreenActions}>
               <div className={style.btnWrapper}>
-                <button className={style.gameScreenRotateBtn}>ROTATE 90o</button>
+                <button className={style.gameScreenRotateBtn} onClick={handleRotateBlock}>ROTATE 90o</button>
                 <button className={style.gameScreenFlipBtn}>FLIP</button>
               </div>
               <div className={style.messagesWrapper}>
