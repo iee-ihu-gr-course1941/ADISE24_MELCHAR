@@ -5,6 +5,7 @@ import WelcomeScreen from "./components/WelcomeScreen";
 import GameScreen from "./components/GameScreen"
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import WaitingScreen from "./components/WaitingScreen";
+import FinishedGameScreen from "./components/FinishedGameScreen";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/roomsScreen" element={<RoomsScreen/>}/>
         <Route path="/gameScreen" element={<GameScreen/>}/>
         <Route path="/waitingScreen" element={<WaitingScreen/>}/>
+        <Route path="/finishedGameScreen/:room_id" element={<FinishedGameScreen/>}/>
       </Routes>
     </BrowserRouter>
     

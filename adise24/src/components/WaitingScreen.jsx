@@ -22,8 +22,7 @@ function WaitingScreen(){
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
                             board_id: room_id,
-                            blocks,
-                            player_id: parseInt(player1_id)
+                            blocks
                         }),
                         credentials: "include",
                     }

@@ -17,8 +17,7 @@ function GameScreen() {
   const [error, setError] = useState(null);
   const { player_id } = location.state || {};
   const [isPlayerPlayer1, setIsPlayerPlayer1] = useState(null);
-  const [isPlayersTurn, setIsPlayersTurn] = useState(false);
-  const [colorPlaying, setColorPlaying] = useState("");
+  const [playersTurn, setPlayersTurn] = useState(1.1);
 
   const handleBlockToMain = (newBlock, player, playerBoardNum, isTheFirstMove) => {
     setBlockToMain({
@@ -137,30 +136,6 @@ function GameScreen() {
   }, [room_id]);
 
   useEffect(() => {
-    if (isPlayerPlayer1 !== null) {
-      if (isPlayerPlayer1) {
-        setColorPlaying("blue");
-      } else {
-        setColorPlaying("green");
-      }
-    }
-  }, [isPlayerPlayer1]);
-
-  useEffect(() => {
-    if (isPlayerPlayer1 === null) return;
-
-    if (isPlayerPlayer1) {
-      setColorPlaying((prevColor) =>
-        prevColor === "red" ? "blue" : "red"
-      );
-    } else {
-      setColorPlaying((prevColor) =>
-        prevColor === "green" ? "yellow" : "green"
-      );
-    }
-  }, [fetchTrigger, isPlayerPlayer1]);
-
-  useEffect(() => {
     const fetchPlayerTurn = async () => {
       try {
         const response = await fetch(
@@ -174,7 +149,7 @@ function GameScreen() {
 
         if (response.ok) {
           const result = await response.json();
-          setIsPlayersTurn(result.player_turn === player_id);
+          setPlayersTurn(parseFloat(result.player_turn));
         } else if (response.status === 401 || response.status === 403) {
           navigate('/loginScreen');
         } else {
@@ -199,7 +174,7 @@ function GameScreen() {
           playerBoardNum={"board_p1_1"}
           room_id={room_id}
           player={1.1}
-          sendBlockToMain={isPlayerPlayer1 && isPlayersTurn && colorPlaying === "blue" ? handleBlockToMain : () => {}}
+          sendBlockToMain={isPlayerPlayer1 && playersTurn === 1.1 ? handleBlockToMain : () => {}}
           triggerFetch={fetchTrigger}
         />
 
@@ -207,7 +182,7 @@ function GameScreen() {
           playerBoardNum={"board_p1_2"}
           room_id={room_id}
           player={1.2}
-          sendBlockToMain={isPlayerPlayer1 && isPlayersTurn && colorPlaying === "red" ? handleBlockToMain : () => {}}
+          sendBlockToMain={isPlayerPlayer1 && playersTurn === 1.2 ? handleBlockToMain : () => {}}
           triggerFetch={fetchTrigger} 
         />
       </div>
@@ -233,10 +208,10 @@ function GameScreen() {
               <div className={style.messagesWrapper}>
                 {error && <div className={style.error}>Error: {error}</div>}
                 <div className={style.turn}>
-                  {isPlayersTurn && isPlayerPlayer1 ? `Player 1 turn! Color playing: ${colorPlaying}` : 
-                    !isPlayersTurn && isPlayerPlayer1 ? "Player 2 turn!" :
-                    isPlayersTurn && !isPlayerPlayer1 ? `Player 2 turn! Color playing: ${colorPlaying}` :
-                    !isPlayersTurn && !isPlayerPlayer1 ? "Player 1 turn!" : ""
+                  {(playersTurn === 1.1 || playersTurn === 1.2) && isPlayerPlayer1 ? `Player 1 turn! Color playing: ${playersTurn === 1.1 ? "Blue" : "Red"}` : 
+                    (playersTurn === 2.1 || playersTurn === 2.2) && isPlayerPlayer1 ? "Player 2 turn!" :
+                    (playersTurn === 2.1 || playersTurn === 2.2) && !isPlayerPlayer1 ? `Player 2 turn! Color playing: ${playersTurn === 2.1 ? "Yellow" : "Green"}` :
+                    (playersTurn === 1.1 || playersTurn === 1.2) && !isPlayerPlayer1 ? "Player 1 turn!" : ""
                   }
                 </div>
               </div>
@@ -251,7 +226,7 @@ function GameScreen() {
           playerBoardNum={"board_p2_1"}
           room_id={room_id}
           player={2.1}
-          sendBlockToMain={!isPlayerPlayer1 && isPlayersTurn  && colorPlaying === "yellow" ? handleBlockToMain : () => {}}
+          sendBlockToMain={!isPlayerPlayer1 && playersTurn === 2.1 ? handleBlockToMain : () => {}}
           triggerFetch={fetchTrigger}
         />
 
@@ -259,7 +234,7 @@ function GameScreen() {
           playerBoardNum={"board_p2_2"}
           room_id={room_id}
           player={2.2}
-          sendBlockToMain={!isPlayerPlayer1 && isPlayersTurn  && colorPlaying === "green" ? handleBlockToMain : () => {}}
+          sendBlockToMain={!isPlayerPlayer1 && playersTurn === 2.2 ? handleBlockToMain : () => {}}
           triggerFetch={fetchTrigger}
         />
       </div>

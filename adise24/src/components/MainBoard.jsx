@@ -1,11 +1,14 @@
 import React, { useEffect, useState, useCallback } from "react";
 import style from '../styling/MainBoard.module.css';
+import { useNavigate } from 'react-router-dom';
 
 const gridSize = 20;
 const totalBoxes = gridSize * gridSize;
 
 function MainBoard({blockToMain, player, board_id, onSuccess, triggerFetch, player_id, isTheFirstMove, onError }) {
+  const navigate = useNavigate();
   const [coloredBlocks, setColoredBlocks] = useState([]);
+
   const fetchColoredBlocks = useCallback(async () => {
     try {
       const response = await fetch(
@@ -217,6 +220,7 @@ function MainBoard({blockToMain, player, board_id, onSuccess, triggerFetch, play
   }
 
   const sendBlockToDB = async (blockDB) => {
+
     try {
       const response = await fetch(
         "https://users.iee.ihu.gr/~iee2020188/adise_php/setBlockToMainBoard.php",
@@ -230,7 +234,8 @@ function MainBoard({blockToMain, player, board_id, onSuccess, triggerFetch, play
             block_id: parseInt(blockToMain.id),
             board_id: parseInt(board_id),
             player: player,
-            player_id: player_id
+            player_id: parseInt(player_id),
+            piece_length: parseInt(blockDB.length)
           }),
           credentials: 'include',
         }
@@ -238,14 +243,19 @@ function MainBoard({blockToMain, player, board_id, onSuccess, triggerFetch, play
 
       if (response.ok) {
         const result = await response.json();
-        await fetchColoredBlocks();
+        console.log(result)
+        if(result.gameEndStatus.isGameOver){
+          navigate(`/finishedGameScreen/${board_id}`, { state: { winner: result.winner } });
+        }else{
+          await fetchColoredBlocks();
 
-        if (onSuccess) {
-          onSuccess();
+          if (onSuccess) {
+            onSuccess();
+          }
         }
       } else {
         const result = await response.json();
-        console.error("Block upload failed:");
+        console.error("Block upload failed: ", result);
       }
     } catch (err) {
       console.error("Error sending block to DB:", err);

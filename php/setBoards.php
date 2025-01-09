@@ -17,12 +17,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $board_id = $input['board_id'];
     $blocks = json_encode($input['blocks']);
-    $player_id = filter_var($input['player_id'], FILTER_VALIDATE_INT); 
     $board_main_json = json_encode([]);
+    $initial_turn = 1.1;
+    $initial_player_points = 178;
 
     try{
-      $sql = "INSERT INTO boards (board_id, board_p1_1, board_p1_2, board_p2_1, board_p2_2, board_main, player_turn)
-      VALUES ('{$board_id}', '{$blocks}', '{$blocks}', '{$blocks}', '{$blocks}', '$board_main_json', '$player_id')";
+      $sql = "INSERT INTO boards (board_id, board_p1_1, board_p1_2, board_p2_1, board_p2_2, board_main, player_turn, player1_points, player2_points)
+      VALUES ('{$board_id}', '{$blocks}', '{$blocks}', '{$blocks}', '{$blocks}', '$board_main_json', '$initial_turn', '$initial_player_points', '$initial_player_points')";
 
       $result = mysqli_query($mysqli, $sql);
 
