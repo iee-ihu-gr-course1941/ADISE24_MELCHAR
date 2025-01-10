@@ -11,11 +11,7 @@ function RoomsScreen() {
   const { player1_id } = location.state || {};
   const blocks = initializePlayerBlocks();
 
-  useEffect(() => {
-    fetchRooms();
-  }, []);
-
-  const fetchRooms = async () => {
+  const fetchRooms = useCallback(async () => {
     setError("");
     try {
       const response = await fetch(
@@ -38,7 +34,16 @@ function RoomsScreen() {
     } catch (err) {
       setError("Failed to connect to the server.");
     }
-  };
+  }, [location, navigate]);
+
+  useEffect(() => {
+    fetchRooms(); 
+    const intervalId = setInterval(() => {
+      fetchRooms();
+    }, 3000);
+
+    return () => clearInterval(intervalId);
+  }, [fetchRooms]);
 
   const performLogOut = useCallback(
     async (e) => {
@@ -156,6 +161,7 @@ function RoomsScreen() {
   }
 
   const onJoinBtnClick = async (room_id) => {
+    console.log("player1_id: ", player1_id);
     try{
       const response = await fetch(
         "https://users.iee.ihu.gr/~iee2020188/adise_php/player2Join.php",
