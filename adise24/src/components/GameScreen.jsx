@@ -176,8 +176,120 @@ function GameScreen() {
               const winner = result.board.player1_points < result.board.player2_points ? "Winner: Player 1" : result.board.player1_points > result.board.player2_points ? "Winner: Player 2" : "Tie"
               navigate(`/finishedGameScreen/${room_id}`, { state: { winner: winner, player1_id: player_id, room_id: room_id} });
           } else {
-              setPlayersTurn(parseFloat(result.board.player_turn));
-          }
+              let playerBoardToCheck = [];
+
+              switch(result.board.player_turn){
+                case 1.1:
+                  playerBoardToCheck = result.board.board_p1_1;
+                break;
+              case 1.2:
+                playerBoardToCheck = result.board.board_p1_2;
+                break;
+              case 2.1:
+                playerBoardToCheck = result.board.board_p2_1;
+                break;
+              case 2.2:
+                playerBoardToCheck = result.board.board_p2_2;
+                break;
+              }
+
+
+              let noValidMoves = true;
+
+              playerBoardToCheck.forEach((piece) => {
+                if (!noValidMoves) return;
+
+                const originalCells = piece.cells;
+
+                const getBoundingBox = (cells) => {
+                  let minRow = Infinity, maxRow = -Infinity;
+                  let minCol = Infinity, maxCol = -Infinity;
+                  cells.forEach(({ row, col }) => {
+                    if (row < minRow) minRow = row;
+                    if (row > maxRow) maxRow = row;
+                    if (col < minCol) minCol = col;
+                    if (col > maxCol) maxCol = col;
+                  });
+                  return { minRow, maxRow, minCol, maxCol };
+                };
+
+                const getAllTransformations = (cells) => {
+                  const transformations = [];
+
+                  let current = [...cells];
+                  for (let r = 0; r < 4; r++) {
+                    if (r > 0) {
+                      current = rotateBlockCellsBy90(current);
+                    }
+
+                    const unflipped = [...current];
+                    const flipped = flipBlockCellsHorizontally(current);
+
+                    transformations.push(unflipped);
+                    transformations.push(flipped);
+                  }
+
+                  return transformations;
+                };
+
+                const allTransformedCells = getAllTransformations(originalCells);
+
+                const shiftPiece = (cells, targetRow, targetCol) => {
+                  const { minRow, minCol } = getBoundingBox(cells);
+                  const rowOffset = targetRow - minRow;
+                  const colOffset = targetCol - minCol;
+
+                  return cells.map(({ row, col }) => ({
+                    row: row + rowOffset,
+                    col: col + colOffset,
+                  }));
+                };
+
+                const isPlacementValid = (cells) => {
+                  const outOfBounds = cells.some(
+                    (cell) => cell.row < 1 || cell.row > 20 || cell.col < 1 || cell.col > 20
+                  );
+                  if (outOfBounds) return false;
+
+                  const existingBlocks = result.board.board_main.flatMap((block) =>
+                    block.main_board
+                  );
+
+                  const collisionDetected = existingBlocks.some((existingCell) =>
+                    cells.some(
+                      (pieceCell) =>
+                        pieceCell.row === existingCell.row && pieceCell.col === existingCell.col
+                    )
+                  );
+                  if (collisionDetected) return false;
+
+                  return true;
+                };
+
+                for (const transformedCells of allTransformedCells) {
+                  for (let row = 1; row <= 20; row++) {
+                    for (let col = 1; col <= 20; col++) {
+                      const shiftedPiece = shiftPiece(transformedCells, row, col);
+
+                      if (isPlacementValid(shiftedPiece)) {
+
+                        noValidMoves = false;
+                        break;
+                      }
+                    }
+                    if (!noValidMoves) break;
+                  }
+                  if (!noValidMoves) break;
+                }
+              });
+
+              if (noValidMoves) {
+                const winner = result.board.player1_points < result.board.player2_points ? "Winner: Player 1" : result.board.player1_points > result.board.player2_points ? "Winner: Player 2" : "Tie"
+                navigate(`/finishedGameScreen/${room_id}`, { state: { winner: winner, player1_id: player_id, room_id: room_id} });
+              }else{
+                setPlayersTurn(parseFloat(result.board.player_turn));
+              }
+            }
           }
         } else if (response.status === 401 || response.status === 403) {
           navigate('/loginScreen');
