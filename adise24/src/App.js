@@ -9,7 +9,7 @@ import FinishedGameScreen from "./components/FinishedGameScreen";
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/~iee2020188">
       <Routes>
         <Route path="/" element={<WelcomeScreen/>}/>
         <Route path="/registerScreen" element={<RegisterScreen/>}/>
