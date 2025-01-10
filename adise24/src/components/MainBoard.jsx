@@ -12,7 +12,7 @@ function MainBoard({blockToMain, player, board_id, onSuccess, triggerFetch, play
   const fetchColoredBlocks = useCallback(async () => {
     try {
       const response = await fetch(
-        `https://users.iee.ihu.gr/~iee2020188/adise_php/getMainBoard.php?board_id=${encodeURIComponent(board_id)}`,
+        `https://users.iee.ihu.gr/~iee2020188/adise_php/getBoardById.php?board_id=${encodeURIComponent(board_id)}`,
         {
           method: "GET",
           headers: { "Content-Type": "application/json" },
@@ -26,7 +26,7 @@ function MainBoard({blockToMain, player, board_id, onSuccess, triggerFetch, play
         let blocksColor = "";
         let allColoredBlocks = [];
 
-        result.board.forEach((field) => {
+        result.board.board_main.forEach((field) => {
           switch (field.player_field) {
             case "board_p1_1":
               blocksColor = "blue";
@@ -99,7 +99,7 @@ function MainBoard({blockToMain, player, board_id, onSuccess, triggerFetch, play
     }
     try {
       const response = await fetch(
-        `https://users.iee.ihu.gr/~iee2020188/adise_php/getMainBoard.php?board_id=${encodeURIComponent(board_id)}`,
+        `https://users.iee.ihu.gr/~iee2020188/adise_php/getBoardById.php?board_id=${encodeURIComponent(board_id)}`,
         {
           method: "GET",
           headers: { "Content-Type": "application/json" },
@@ -109,7 +109,7 @@ function MainBoard({blockToMain, player, board_id, onSuccess, triggerFetch, play
 
       if(response.ok){
         const result = await response.json();
-        const isAnotherBlockPlaced = result.board.some((element) => {
+        const isAnotherBlockPlaced = result.board.board_main.some((element) => {
           return element.main_board.some((boardCell) => {
             return blockDB.some((blockCell) => {
               return boardCell.row === blockCell.row && boardCell.col === blockCell.col;
@@ -120,6 +120,7 @@ function MainBoard({blockToMain, player, board_id, onSuccess, triggerFetch, play
         const isBlockOffBounds = blockDB.some((blockCell) => {
             return blockCell.row > 20 || blockCell.col > 20 || blockCell.row < 1 || blockCell.col < 1
         });
+
 
         if(isAnotherBlockPlaced){
           if(onError){
@@ -162,7 +163,7 @@ function MainBoard({blockToMain, player, board_id, onSuccess, triggerFetch, play
                 break;
             }
 
-            const sameColorFields = result.board.filter((field) => field.player_field === converted_player_field);
+            const sameColorFields = result.board.board_main.filter((field) => field.player_field === converted_player_field);
 
             const sameColorCells = sameColorFields.reduce((acc, field) => {
               return acc.concat(field.main_board);
@@ -214,7 +215,7 @@ function MainBoard({blockToMain, player, board_id, onSuccess, triggerFetch, play
       }
     }catch(err){
       if(onError){
-        onError("Something went wrong. Try again.");
+        onError("Something went wrong. Try again.", err);
       }
     }
   }
@@ -243,16 +244,13 @@ function MainBoard({blockToMain, player, board_id, onSuccess, triggerFetch, play
 
       if (response.ok) {
         const result = await response.json();
-        console.log(result)
-        if(result.gameEndStatus.isGameOver){
-          navigate(`/finishedGameScreen/${board_id}`, { state: { winner: result.winner } });
-        }else{
-          await fetchColoredBlocks();
+        
+        await fetchColoredBlocks();
 
-          if (onSuccess) {
-            onSuccess();
-          }
+        if (onSuccess) {
+          onSuccess();
         }
+
       } else {
         const result = await response.json();
         console.error("Block upload failed: ", result);

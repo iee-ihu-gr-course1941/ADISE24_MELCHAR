@@ -89,7 +89,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
             $points_to_player = "player2_points";
         }
 
-        $updated_points = $board[$points_to_player] - $piece_length;
+        $updated_points = 0;
+        if (sizeof($player_blocks) > 1) {
+            $updated_points = $board[$points_to_player] - $piece_length;
+        } else {
+            $updated_points = $board[$points_to_player] - $piece_length - 15;
+        }
 
         $stmt = $mysqli->prepare("UPDATE boards SET `$player_field` = ?, board_main = ?, player_turn = ?, `$points_to_player` = ?  WHERE board_id = ?");
         $player_blocks_json = json_encode(array_values($player_blocks));
@@ -101,35 +106,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
         $main_board[] = $combined_data;
         $final_board_to_send = json_encode($main_board);
         $stmt->bind_param("ssdii", $player_blocks_json, $final_board_to_send, $turn, $updated_points, $board_id);
+        $stmt->execute();
 
-        if ($stmt->execute()) {
+        http_response_code(200);
+        echo json_encode(["success" => true, "message" => "Board updated successfully.", "board" => $final_board_to_send]);
         
-            require_once("checkGameEnd.php");
-        
-            $gameEndStatus = checkGameEndFunction($board_id, $mysqli);
-
-            $response = [
-                "success" => true,
-                "message" => "Board updated successfully.",
-                "board"   => $final_board_to_send, 
-                "gameEndStatus" => $gameEndStatus
-            ];
-        
-            http_response_code(200);
-            echo json_encode($response);
-            exit(); 
-        } else {
-            $response = [
-                "success" => false,
-                "message" => "Board updated successfully.",
-                "board"   => $final_board_to_send, 
-                "gameEndStatus" => $gameEndStatus
-            ];
-
-            http_response_code(500);
-            echo json_encode($response);
-            exit(); 
-        }
     } catch (mysqli_sql_exception $e) {
         http_response_code(500);
         echo json_encode(["error" => "Database error: " . $e->getMessage()]);

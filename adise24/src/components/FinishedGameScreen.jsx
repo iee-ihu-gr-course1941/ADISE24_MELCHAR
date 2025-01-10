@@ -4,7 +4,7 @@ function FinishedGameScreen(){
 
     const location = useLocation();
 
-    return <h1>`Winner: ${location.state.winner}`</h1>
+    return <h1>{location.state.winner}</h1>
 }
 
 export default FinishedGameScreen

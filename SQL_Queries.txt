@@ -20,7 +20,8 @@ CREATE TABLE boards(
   board_p2_2 JSON, 
   board_main JSON,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  player_turn INT,
+  player_turn FLOAT,
   player1_points INT,
-  player2_points INT
+  player2_points INT,
+  player_aborded FLOAT
 );
