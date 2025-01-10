@@ -154,16 +154,15 @@ function GameScreen() {
         if (response.ok) {
           const result = await response.json();
           if(result.board.player_aborded !== null){
-
             if(result.board.player_aborded === "1.1" || result.board.player_aborded === "1.2"){
               if(isPlayerPlayer1){
                 navigate("/roomsScreen", { state: { player1_id: player_id } })
               }else{
-                navigate(`/finishedGameScreen/${room_id}`, { state: { winner: "Winner: Player 2. Player 1 aborded the game." } })
+                navigate(`/finishedGameScreen/${room_id}`, { state: { winner: "Winner: Player 2. Player 1 aborded the game.", player1_id: player_id, room_id: room_id} })
               }
             }else if(result.board.player_aborded === "2.1" || result.board.player_aborded === "2.2"){
               if(isPlayerPlayer1){
-                navigate(`/finishedGameScreen/${room_id}`, { state: { winner: "Winner: Player 1. Player 2 aborded the game." } })
+                navigate(`/finishedGameScreen/${room_id}`, { state: { winner: "Winner: Player 1. Player 2 aborded the game.", player1_id: player_id, room_id: room_id} })
               }else{
                 navigate("/roomsScreen", { state: { player1_id: player_id } })
               }
@@ -175,7 +174,7 @@ function GameScreen() {
             isBoardEmpty(result.board.board_p2_2)
             ){
               const winner = result.board.player1_points < result.board.player2_points ? "Winner: Player 1" : result.board.player1_points > result.board.player2_points ? "Winner: Player 2" : "Tie"
-              navigate(`/finishedGameScreen/${room_id}`, { state: { winner: winner } });
+              navigate(`/finishedGameScreen/${room_id}`, { state: { winner: winner, player1_id: player_id, room_id: room_id} });
           } else {
               setPlayersTurn(parseFloat(result.board.player_turn));
           }
@@ -196,8 +195,8 @@ function GameScreen() {
     }
   }, [fetchTrigger, room_id, player_id, navigate]);
 
-  const onLeaveButtonPressed = async (pressed_by_player) =>  {
-    try{
+  const onLeaveButtonPressed = useCallback(async (pressed_by_player) => {
+    try {
       const response = await fetch(
         `https://users.iee.ihu.gr/~iee2020188/adise_php/updateAborded.php?board_id=${encodeURIComponent(room_id)}&player_aborded=${encodeURIComponent(pressed_by_player)}`,
         {
@@ -206,16 +205,15 @@ function GameScreen() {
           credentials: "include",
         }
       );
-
-      if(response.ok){
-
-      }else{
-        setError("Something went wrong.")
+  
+      if (!response.ok) {
+        setError("Something went wrong.");
       }
-    }catch(err){
-      console.log(err)
+    } catch (err) {
+      console.log(err);
+      setError("An error occurred while leaving the game.");
     }
-  }
+  }, [room_id]);
   
   return (
     <div className={style.container}>
@@ -266,7 +264,7 @@ function GameScreen() {
                   }
                 </div>
               </div>
-              <button className={style.leaveBtn} onClick={() => onLeaveButtonPressed(playersTurn)}>LEAVE</button>
+              <button className={style.leaveBtn} onClick={() => ((isPlayerPlayer1 && (playersTurn === 1.1 || playersTurn === 1.2)) || ((playersTurn === 2.1 || playersTurn === 2.2) && !isPlayerPlayer1)) && onLeaveButtonPressed(playersTurn)}>LEAVE</button>
             </div>
           </>
         </div>
